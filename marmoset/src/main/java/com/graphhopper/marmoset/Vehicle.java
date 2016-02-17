@@ -6,4 +6,6 @@ import com.graphhopper.*;
  */
 public class Vehicle {
     public long currentRoadId; // OSM ID of the current road
+    private float lat;
+    private float lon;
 }
