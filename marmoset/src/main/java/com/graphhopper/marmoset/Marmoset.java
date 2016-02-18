@@ -1,73 +1,87 @@
 package com.graphhopper.marmoset;
 
-import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.SimpleWebServer;
-import fi.iki.elonen.NanoWSD;
 import fi.iki.elonen.util.ServerRunner;
+
+import org.java_websocket.WebSocket;
+import org.java_websocket.handshake.ClientHandshake;
+import org.java_websocket.server.WebSocketServer;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.util.HashSet;
 
 /**
  * Created by alexander on 16/02/2016.
  */
 public class Marmoset {
 
-    private static class MarmosetWebSocket extends NanoWSD.WebSocket {
+    private static class MarmosetSocketServer extends WebSocketServer {
 
-        public MarmosetWebSocket(NanoHTTPD.IHTTPSession handshakeRequest)
+        private HashSet<WebSocket> sockets;
+
+        public MarmosetSocketServer(InetSocketAddress address)
         {
-            super(handshakeRequest);
+            super(address);
+            sockets = new HashSet<WebSocket>();
+        }
+
+        public void distributeData(String s) {
+
+
         }
 
         @Override
-        protected void onOpen()
+        public void onOpen(WebSocket webSocket, ClientHandshake clientHandshake)
         {
-            System.out.println("OPEN!");
+            System.out.println("OPEN!" + webSocket.toString());
+            sockets.add(webSocket);
         }
 
         @Override
-        protected void onClose(NanoWSD.WebSocketFrame.CloseCode closeCode, String s, boolean b)
+        public void onClose(WebSocket webSocket, int i, String s, boolean b)
         {
-
-            System.out.println("CLOSE!");
+            System.out.println("CLOSE!" + webSocket.toString());
+            sockets.remove(webSocket);
         }
 
         @Override
-        protected void onMessage(NanoWSD.WebSocketFrame webSocketFrame)
+        public void onMessage(WebSocket webSocket, String s)
         {
-            System.out.println("Message: " + webSocketFrame.getTextPayload());
+            System.out.println("Message:" + s);
         }
 
         @Override
-        protected void onPong(NanoWSD.WebSocketFrame webSocketFrame)
+        public void onError(WebSocket webSocket, Exception e)
         {
-            System.out.println("PONG!");
-        }
-
-        @Override
-        protected void onException(IOException e)
-        {
+            System.out.println("Error :(");
+            sockets.remove(webSocket);
             e.printStackTrace();
         }
     }
 
-    private static class MarmosetSocketServer extends NanoWSD {
-
-        public MarmosetSocketServer(String hostname, int port)
-        {
-            super(hostname, port);
-        }
-
-        @Override
-        protected WebSocket openWebSocket(IHTTPSession ihttpSession)
-        {
-            System.out.println("Opening web socket");
-            return new MarmosetWebSocket(ihttpSession);
-        }
-    }
+    private static MarmosetHopper mh;
 
     public static void main(String[] args) throws IOException
+    {
+        mh = new MarmosetHopper();
+        mh.init();
+
+        startFileServer();
+        startWebSocketServer();
+
+    }
+
+    private static void startWebSocketServer()
+    {
+        int port = 8888;
+
+        WebSocketServer server = new MarmosetSocketServer(new InetSocketAddress(port));
+        server.start();
+    }
+
+    private static void startFileServer()
     {
         final File rootDir = new File("marmoset/src/main/webapp").getAbsoluteFile();
         new Thread() {
@@ -76,19 +90,7 @@ public class Marmoset {
                 ServerRunner.executeInstance(new SimpleWebServer(null, 8080, rootDir, true, null));
             }
         }.start();
-
-        NanoWSD server = new MarmosetSocketServer(null, 8888);
-
-        try
-        {
-            server.start();
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-
-        MarmosetHopper mh = new MarmosetHopper();
-        mh.init();
     }
+
+
 }
