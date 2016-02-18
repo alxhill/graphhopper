@@ -6,8 +6,16 @@ import com.graphhopper.*;
  */
 public class Vehicle {
 
+    private static int maxId = 0;
+
+    private long currentRoadId; // OSM ID of the current road
+    private float lat;
+    private float lon;
+    public final int id;
+
     public Vehicle(long startRoadId)
     {
+        this.id = maxId++;
         this.currentRoadId = startRoadId;
     }
 
@@ -26,7 +34,9 @@ public class Vehicle {
         return lon;
     }
 
-    private long currentRoadId; // OSM ID of the current road
-    private float lat;
-    private float lon;
+    @Override
+    public String toString()
+    {
+        return String.format("%d|%f|%f", id, getLat(), getLon());
+    }
 }
