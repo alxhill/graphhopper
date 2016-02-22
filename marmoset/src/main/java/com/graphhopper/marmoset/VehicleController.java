@@ -10,4 +10,9 @@ public class VehicleController {
     {
         this.vehicle = vehicle;
     }
+
+    public Vehicle getVehicle()
+    {
+        return vehicle;
+    }
 }

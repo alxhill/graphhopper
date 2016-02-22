@@ -1,5 +1,4 @@
 package com.graphhopper.marmoset;
-import com.graphhopper.*;
 
 /**
  * Created by alexander on 16/02/2016.
@@ -9,12 +8,14 @@ public class Vehicle {
     private static int maxId = 0;
 
     private long currentRoadId; // OSM ID of the current road
-    private float lat;
-    private float lon;
+    private double lat;
+    private double lon;
     public final int id;
 
-    public Vehicle(long startRoadId)
+    public Vehicle(long startRoadId, double lat, double lon)
     {
+        this.lat = lat;
+        this.lon = lon;
         this.id = maxId++;
         this.currentRoadId = startRoadId;
     }
@@ -24,12 +25,12 @@ public class Vehicle {
         return currentRoadId;
     }
 
-    public float getLat()
+    public double getLat()
     {
         return lat;
     }
 
-    public float getLon()
+    public double getLon()
     {
         return lon;
     }
