@@ -15,13 +15,20 @@ public class Marmoset {
     private static MarmosetHopper mh;
     private static MarmosetSocketServer mss;
 
-    public static void main(String[] args) throws IOException
+    public static void main(String[] args) throws IOException, InterruptedException
     {
         mh = new MarmosetHopper();
         mh.init();
 
         startFileServer();
         startWebSocketServer();
+
+        while (true) {
+            mh.timestep();
+            String data = mh.getVehicleData();
+            mss.distributeData(data);
+            Thread.sleep(1000);
+        }
     }
 
     private static void startWebSocketServer()

@@ -11,8 +11,8 @@ import java.util.List;
  * Created by alexander on 15/02/2016.
  */
 public class MarmosetHopper {
-    GraphHopper hopper;
 
+    GraphHopper hopper;
     List<VehicleController> vehicles;
 
     public MarmosetHopper() {
@@ -36,6 +36,12 @@ public class MarmosetHopper {
         args.put("osmreader.osm", "british-isles-latest.osm.pbf");
         hopper.init(args);
         vehicles.add(new VehicleController(new Vehicle(0, 51.505, -0.09)));
+    }
+
+    public void timestep() {
+        for (VehicleController v : vehicles) {
+            v.calculateStep();
+        }
     }
 
     public String getVehicleData() {

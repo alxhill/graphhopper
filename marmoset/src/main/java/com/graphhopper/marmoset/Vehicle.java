@@ -40,4 +40,11 @@ public class Vehicle {
     {
         return String.format("%d|%f|%f", id, getLat(), getLon());
     }
+
+    public void moveTo(long newRoad, double newLat, double newLon)
+    {
+        currentRoadId = newRoad;
+        lat = newLat;
+        lon = newLon;
+    }
 }
