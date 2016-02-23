@@ -1,54 +1,60 @@
 package com.graphhopper.marmoset;
 
+import com.graphhopper.GHRequest;
+import com.graphhopper.GraphHopper;
+import com.graphhopper.PathWrapper;
 import com.graphhopper.marmoset.util.Location;
+import com.graphhopper.util.InstructionList;
+import com.graphhopper.util.PointList;
 
 /**
  * Created by alexander on 16/02/2016.
  */
 public class Vehicle {
-
     private static int maxId = 0;
 
-    private long currentRoadId; // OSM ID of the current road
+    private final int id;
+
+    private GraphHopper hopper;
     private Location loc;
-    public final int id;
+    private Location dest;
+    private boolean finished;
 
-    public Vehicle(long startRoadId, double lat, double lon)
+    public Vehicle(GraphHopper hopper, Location start, Location dest)
     {
-        this.loc = new Location(lat, lon);
+        this.hopper = hopper;
+        this.dest = dest;
+        this.loc = start;
         this.id = maxId++;
-        this.currentRoadId = startRoadId;
+        finished = false;
     }
 
-    public long getCurrentRoadId()
+    public void calculateStep()
     {
-        return currentRoadId;
-    }
+        if (finished)
+            return;
 
-    public Location getLocation()
-    {
-        return loc;
-    }
+        GHRequest r = new GHRequest(loc.getLat(), loc.getLon(), dest.getLat(), dest.getLon());
+        PathWrapper route = hopper.route(r).getBest();
 
-    public int getId()
-    {
-        return id;
+        PointList path = route.getPoints();
+        InstructionList il = route.getInstructions();
+
+        if (route.getPoints().size() < 2)
+        {
+            System.out.println("Vehicle " + id + " reached destination");
+            finished = true;
+            return;
+        }
+
+        System.out.println(path.toString());
+        System.out.println(il.toString());
+        loc.set(path.getLat(2), path.getLon(2));
     }
 
     @Override
     public String toString()
     {
-        return String.valueOf(id) + "|" + loc.toString();
-    }
-
-    public void moveTo(long newRoad, double newLat, double newLon)
-    {
-        currentRoadId = newRoad;
-        loc.set(newLat, newLon);
-    }
-
-    public void moveBy(double latDiff, double lonDiff)
-    {
-        loc.add(latDiff, lonDiff);
+        return String.format("%d|%s", id, loc.toString());
     }
 }

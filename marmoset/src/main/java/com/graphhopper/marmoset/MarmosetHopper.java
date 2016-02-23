@@ -7,6 +7,7 @@ import com.graphhopper.util.CmdArgs;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by alexander on 15/02/2016.
@@ -14,11 +15,11 @@ import java.util.List;
 public class MarmosetHopper {
 
     GraphHopper hopper;
-    List<VehicleController> vehicles;
+    List<Vehicle> vehicles;
 
     public MarmosetHopper() {
         hopper = new GraphHopper();
-        vehicles = new ArrayList<VehicleController>();
+        vehicles = new ArrayList<>();
     }
 
     public void init()
@@ -37,24 +38,15 @@ public class MarmosetHopper {
         args.put("osmreader.osm", "british-isles-latest.osm.pbf");
         hopper.init(args);
         hopper.importOrLoad();
-        vehicles.add(new VehicleController(hopper, new Vehicle(0, 51.505, -0.09), new Location(51.48, -0.10)));
-        vehicles.add(new VehicleController(hopper, new Vehicle(0, 51.611621,0.10643), new Location(51.433892,-0.291824)));
+        vehicles.add(new Vehicle(hopper, new Location(51.505, -0.09), new Location(51.48, -0.10)));
+        vehicles.add(new Vehicle(hopper, new Location(51.611621,0.10643), new Location(51.433892,-0.291824)));
     }
 
     public void timestep() {
-        for (VehicleController v : vehicles) {
-            v.calculateStep();
-        }
+        vehicles.parallelStream().forEach(Vehicle::calculateStep);
     }
 
     public String getVehicleData() {
-        StringBuilder sb = new StringBuilder();
-        for (VehicleController v : vehicles)
-        {
-            sb.append(v.getVehicle().toString());
-            sb.append(",");
-        }
-        sb.deleteCharAt(sb.length() - 1); // remove last comma
-        return sb.toString();
+        return vehicles.stream().map(Vehicle::toString).collect(Collectors.joining(","));
     }
 }
