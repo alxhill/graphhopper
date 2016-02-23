@@ -29,6 +29,12 @@ public class Vehicle {
         finished = false;
     }
 
+    public boolean isFinished()
+    {
+        return finished;
+    }
+
+//    private PathWrapper route;
     public void calculateStep()
     {
         if (finished)
@@ -40,15 +46,15 @@ public class Vehicle {
         PointList path = route.getPoints();
         InstructionList il = route.getInstructions();
 
-        if (route.getPoints().size() < 2)
+        if (route.getPoints().size() <= 3)
         {
             System.out.println("Vehicle " + id + " reached destination");
             finished = true;
             return;
         }
 
-        System.out.println(path.toString());
-        System.out.println(il.toString());
+//        System.out.println(path.toString());
+//        System.out.println(il.toString());
         loc.set(path.getLat(2), path.getLon(2));
     }
 
