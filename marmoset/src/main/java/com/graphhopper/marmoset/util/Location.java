@@ -37,6 +37,6 @@ public class Location {
     @Override
     public String toString()
     {
-        return String.format("%f.10|%f.10", lat, lon);
+        return String.format("%.10f|%.10f", lat, lon);
     }
 }

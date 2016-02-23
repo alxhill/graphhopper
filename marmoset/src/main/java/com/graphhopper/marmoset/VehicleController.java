@@ -14,12 +14,14 @@ public class VehicleController {
     private Vehicle vehicle;
     private GraphHopper hopper;
     private Location dest;
+    private boolean finished;
 
     public VehicleController(GraphHopper hopper, Vehicle vehicle, Location dest)
     {
         this.hopper = hopper;
         this.vehicle = vehicle;
         this.dest = dest;
+        finished = false;
     }
 
     public Vehicle getVehicle()
@@ -29,12 +31,22 @@ public class VehicleController {
 
     public void calculateStep()
     {
+        if (finished)
+            return;
+
         GHRequest r = new GHRequest(vehicle.getLocation().getLat(), vehicle.getLocation().getLon(),
                 dest.getLat(), dest.getLon());
         PathWrapper route = hopper.route(r).getBest();
 
         PointList path = route.getPoints();
         InstructionList il = route.getInstructions();
+
+        if (route.getPoints().size() < 2)
+        {
+            System.out.println("Vehicle " + vehicle.getId() + " reached destination");
+            finished = true;
+            return;
+        }
 
         System.out.println(path.toString());
         System.out.println(il.toString());

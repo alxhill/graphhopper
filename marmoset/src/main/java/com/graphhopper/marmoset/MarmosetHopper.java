@@ -38,6 +38,7 @@ public class MarmosetHopper {
         hopper.init(args);
         hopper.importOrLoad();
         vehicles.add(new VehicleController(hopper, new Vehicle(0, 51.505, -0.09), new Location(51.48, -0.10)));
+        vehicles.add(new VehicleController(hopper, new Vehicle(0, 51.611621,0.10643), new Location(51.433892,-0.291824)));
     }
 
     public void timestep() {
@@ -51,7 +52,9 @@ public class MarmosetHopper {
         for (VehicleController v : vehicles)
         {
             sb.append(v.getVehicle().toString());
+            sb.append(",");
         }
+        sb.deleteCharAt(sb.length() - 1); // remove last comma
         return sb.toString();
     }
 }

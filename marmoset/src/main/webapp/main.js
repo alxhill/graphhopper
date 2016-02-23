@@ -64,7 +64,6 @@ var Car = function(road, lat, lon) {
 Car.prototype = {
     moveTo: function(lat, lon) {
         var line = [this.pos, [lat, lon]];
-        console.log(line);
         this.pos = [lat, lon];
         if (this.marker == null) {
             this.marker = L.animatedMarker(line, {icon: carIcon, distance: 1, interval: 1000});
