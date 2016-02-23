@@ -43,7 +43,6 @@ var carSet = {
             var lat = parseFloat(msg[1]);
             var lon = parseFloat(msg[2]);
             var index = parseInt(msg[0]);
-            console.log(lat, lon, index);
             if (this._cars[index]) {
                 this._cars[index].moveTo(lat, lon);
             } else {
@@ -62,9 +61,15 @@ var Car = function(road, lat, lon) {
 
 Car.prototype = {
     moveTo: function(lat, lon) {
-        var line = L.polyline([this.pos, [lat, lon]]);
-        var marker = L.animatedMarker(line.getLatLngs(), {icon: carIcon, interval: 1000});
+        var line = [this.pos, [lat, lon]];
         this.pos = [lat, lon];
-        window.map.addLayer(marker);
+        if (this.marker == null) {
+            this.marker = L.animatedMarker(line, {icon: carIcon, distance: 1, interval: 1000});
+            window.map.addLayer(this.marker);
+        } else {
+            this.marker.stop();
+            this.marker.setLine(line);
+        }
+        this.marker.start();
     }
 }

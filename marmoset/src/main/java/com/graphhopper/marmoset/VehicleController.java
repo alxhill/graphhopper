@@ -17,6 +17,6 @@ public class VehicleController {
     }
 
     public void calculateStep() {
-        vehicle.moveTo(0, vehicle.getLat() + 0.01, vehicle.getLon() + 0.01);
+        vehicle.moveTo(0, vehicle.getLat() + 0.001, vehicle.getLon() + 0.001);
     }
 }
