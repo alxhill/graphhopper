@@ -32,7 +32,9 @@ var carSet = {
         this.ws.onmessage = function (e) {
             this.processData(e.data);
         }.bind(this);
-
+        this.ws.onopen = function(e) {
+            e.target.send("run");
+        };
     },
 
     // deals with the set of data that comes from the websocket
@@ -62,6 +64,7 @@ var Car = function(road, lat, lon) {
 Car.prototype = {
     moveTo: function(lat, lon) {
         var line = [this.pos, [lat, lon]];
+        console.log(line);
         this.pos = [lat, lon];
         if (this.marker == null) {
             this.marker = L.animatedMarker(line, {icon: carIcon, distance: 1, interval: 1000});

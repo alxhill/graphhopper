@@ -43,9 +43,12 @@ public class MarmosetSocketServer extends WebSocketServer {
 
     @Override
     public void onMessage(WebSocket webSocket, String s)
-                                                    {
-                                                       System.out.println("Message:" + s);
-                                                                                          }
+    {
+        if (s.equals("run"))
+        {
+            Marmoset.run();
+        }
+    }
 
     @Override
     public void onError(WebSocket webSocket, Exception e)

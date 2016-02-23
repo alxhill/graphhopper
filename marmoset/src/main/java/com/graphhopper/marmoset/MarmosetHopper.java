@@ -1,6 +1,7 @@
 package com.graphhopper.marmoset;
 
 import com.graphhopper.GraphHopper;
+import com.graphhopper.marmoset.util.Location;
 import com.graphhopper.util.CmdArgs;
 
 import java.io.IOException;
@@ -35,7 +36,8 @@ public class MarmosetHopper {
 
         args.put("osmreader.osm", "british-isles-latest.osm.pbf");
         hopper.init(args);
-        vehicles.add(new VehicleController(new Vehicle(0, 51.505, -0.09)));
+        hopper.importOrLoad();
+        vehicles.add(new VehicleController(hopper, new Vehicle(0, 51.505, -0.09), new Location(51.48, -0.10)));
     }
 
     public void timestep() {

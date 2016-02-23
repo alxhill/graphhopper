@@ -14,6 +14,7 @@ public class Marmoset {
 
     private static MarmosetHopper mh;
     private static MarmosetSocketServer mss;
+    private static boolean isRunning = false;
 
     public static void main(String[] args) throws IOException, InterruptedException
     {
@@ -22,12 +23,36 @@ public class Marmoset {
 
         startFileServer();
         startWebSocketServer();
+    }
 
-        while (true) {
-            mh.timestep();
-            String data = mh.getVehicleData();
-            mss.distributeData(data);
-            Thread.sleep(1000);
+    public static void run()
+    {
+        if (!isRunning)
+        {
+            isRunning = true;
+            new Thread() {
+                @Override
+                public void run()
+                {
+                    int i = 0;
+                    while (true)
+                    {
+                        System.out.println("Running iteration " + i);
+                        i++;
+                        mh.timestep();
+                        String data = mh.getVehicleData();
+                        mss.distributeData(data);
+                        try
+                        {
+                            Thread.sleep(1000);
+                        }
+                        catch (InterruptedException e)
+                        {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }.start();
         }
     }
 
