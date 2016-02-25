@@ -14,8 +14,8 @@ import java.util.stream.Stream;
  */
 public class MarmosetHopper {
 
-    GraphHopper hopper;
-    List<Vehicle> vehicles;
+    private GraphHopper hopper;
+    private List<Vehicle> vehicles;
 
     public MarmosetHopper() {
         hopper = new GraphHopper();
@@ -38,7 +38,7 @@ public class MarmosetHopper {
         args.put("osmreader.osm", "british-isles-latest.osm.pbf");
         hopper.init(args);
         hopper.importOrLoad();
-        int count = 100;
+        int count = 1000;
         Random latRan = new Random(123);
         Random lonRan = new Random(456);
 
@@ -56,6 +56,6 @@ public class MarmosetHopper {
     }
 
     public String getVehicleData() {
-        return vehicles.stream().map(Vehicle::toString).collect(Collectors.joining(","));
+        return vehicles.parallelStream().map(Vehicle::toString).collect(Collectors.joining(","));
     }
 }

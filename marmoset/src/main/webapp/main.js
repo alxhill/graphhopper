@@ -4,7 +4,7 @@
 function initMap() {
     window.carIcon = L.icon({
         iconUrl: 'car-icon.png',
-        iconSize: [40,30]
+        iconSize: [20,15]
     });
 
     window.map = L.map('map').setView([51.505, -0.09], 13);
