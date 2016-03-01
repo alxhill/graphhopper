@@ -23,7 +23,8 @@ public class CellsGraph {
         cells = new byte[iterator.getMaxId()][];
         while (iterator.next())
         {
-            cells[iterator.getEdge()] = new byte[(int) (iterator.getDistance() / cellSize)];
+            int cellCount = Math.max(1, (int) (iterator.getDistance() / cellSize));
+            cells[iterator.getEdge()] = new byte[cellCount];
             totalDist += iterator.getDistance();
         }
     }
@@ -62,7 +63,7 @@ public class CellsGraph {
                     String.format("EdgeId '%d' out of bounds (max %d)", edgeId, cells.length));
         if (cellId >= cells[edgeId].length)
             throw new ArrayIndexOutOfBoundsException(
-                    String.format("CellId '%d' out of bounds (max %d)", cellId, cells[edgeId].length));
+                    String.format("CellId '%d' out of bounds (max %d) for edge %d", cellId, cells[edgeId].length, edgeId));
 
         cells[edgeId][cellId] = v;
     }

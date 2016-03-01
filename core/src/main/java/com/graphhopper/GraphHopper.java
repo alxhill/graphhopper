@@ -1033,7 +1033,7 @@ public class GraphHopper implements GraphHopperAPI
         return response;
     }
 
-    protected List<Path> calcPaths( GHRequest request, GHResponse ghRsp )
+    public List<Path> calcPaths( GHRequest request, GHResponse ghRsp )
     {
         if (ghStorage == null || !fullyLoaded)
             throw new IllegalStateException("Call load or importOrLoad before routing");

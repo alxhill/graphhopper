@@ -42,7 +42,7 @@ public class MarmosetHopper {
         hopper.init(args);
         hopper.importOrLoad();
 
-        cellsGraph = new CellsGraph(hopper.getGraphHopperStorage(), 10);
+        cellsGraph = new CellsGraph(hopper.getGraphHopperStorage().getBaseGraph(), 10);
         cellsGraph.init();
 
         int count = args.getInt("marmoset.vehicles", 1000);
@@ -53,7 +53,7 @@ public class MarmosetHopper {
         ArrayList<Double> lats = latRan.doubles(51.2, 51.7).limit(count * 2).boxed().collect(Collectors.toCollection(ArrayList::new));
 
         vehicles = IntStream.range(0, count).map(c -> c * 2)
-                .mapToObj(c -> new Vehicle(this, new Location(lats.get(c), lons.get(c)), new Location(c+1, c+1)))
+                .mapToObj(c -> new Vehicle(this, new Location(lats.get(c), lons.get(c)), new Location(lats.get(c+1), lons.get(c+1))))
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 

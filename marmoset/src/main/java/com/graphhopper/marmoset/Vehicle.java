@@ -1,8 +1,11 @@
 package com.graphhopper.marmoset;
 
+import com.graphhopper.GHRequest;
+import com.graphhopper.GHResponse;
 import com.graphhopper.GraphHopper;
 import com.graphhopper.marmoset.util.CellsGraph;
 import com.graphhopper.marmoset.util.Location;
+import com.graphhopper.routing.Path;
 import com.graphhopper.routing.util.EdgeFilter;
 import com.graphhopper.routing.util.FlagEncoder;
 import com.graphhopper.storage.GraphHopperStorage;
@@ -11,7 +14,10 @@ import com.graphhopper.storage.index.QueryResult;
 import com.graphhopper.util.*;
 import com.graphhopper.util.shapes.GHPoint3D;
 
+import java.util.List;
+import java.util.OptionalInt;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 /**
  * Created by alexander on 16/02/2016.
@@ -32,6 +38,9 @@ public class Vehicle {
     private byte v; // velocity
     private float slowProb;
     private byte maxVelocity = 5;
+
+    private List<EdgeIteratorState> edgeList;
+    private int edgeIndex;
 
     private CellsGraph cg;
 
@@ -58,14 +67,25 @@ public class Vehicle {
         cg = hopper.getCellsGraph();
 
         GraphHopper gh = hopper.getGraphHopper();
-        LocationIndex locationIndex = gh.getLocationIndex();
-        QueryResult closest = locationIndex.findClosest(loc.getLat(), loc.getLon(), EdgeFilter.ALL_EDGES);
-        EdgeIteratorState e = closest.getClosestEdge();
-        System.out.println(e);
-        edgeId = closest.getClosestEdge().getEdge();
-        adjId = closest.getClosestEdge().getAdjNode();
-        GHPoint3D p = closest.getSnappedPoint();
-        loc.set(p.lat, p.lon);
+
+        GHRequest ghRequest = new GHRequest(loc.getLat(), loc.getLon(), dest.getLat(), dest.getLon());
+        System.out.println(loc + "->" + dest);
+        GHResponse ghResponse = new GHResponse();
+        List<Path> paths = gh.calcPaths(ghRequest, ghResponse);
+        if (ghResponse.hasErrors())
+            System.out.println("ERRORS:" + ghResponse.getErrors().stream().map(Throwable::toString).collect(Collectors.joining("\n")));
+
+        edgeList = paths.get(0).calcEdges();
+        // start from 1 to avoid the 'fake' edge added by the query graph
+        edgeIndex = 1;
+
+        EdgeIteratorState e = edgeList.get(edgeIndex);
+        int maxId = edgeList.stream().mapToInt(EdgeIteratorState::getEdge).max().getAsInt();
+        int minId = edgeList.stream().mapToInt(EdgeIteratorState::getEdge).min().getAsInt();
+        edgeId = e.getEdge();
+        System.out.println("edge id: " + edgeId);
+        System.out.println("max edge id: " + maxId);
+        System.out.println("min edge id: " + minId);
 
         cg.set(edgeId, cellId, v);
     }
@@ -110,10 +130,8 @@ public class Vehicle {
 
     public void updateLocation()
     {
-        double progress = cellId / (float) cg.getCellCount(edgeId);
-        GraphHopper gh = hopper.getGraphHopper();
-        GraphHopperStorage graph = gh.getGraphHopperStorage();
-        EdgeIteratorState edge = graph.getEdgeIteratorState(edgeId, adjId);
+        double progress = cellId / (float) (cg.getCellCount(edgeId)+1);
+        EdgeIteratorState edge = edgeList.get(edgeIndex);
 
         PointList path = edge.fetchWayGeometry(3);
         if (path.isEmpty())
@@ -141,7 +159,10 @@ public class Vehicle {
                 double newLat = path.getLat(i) + partProgress * (path.getLat(i + 1) - path.getLat(i));
                 double newLon = path.getLon(i) + partProgress * (path.getLon(i + 1) - path.getLon(i));
                 loc.set(newLat, newLon);
-                return;
+                if (currDist + nextDist > dist)
+                {
+                    edgeIndex++;
+                }
             }
             currDist += nextDist;
         }

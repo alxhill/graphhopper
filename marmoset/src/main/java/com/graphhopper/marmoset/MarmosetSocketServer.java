@@ -17,14 +17,12 @@ public class MarmosetSocketServer extends WebSocketServer {
     public MarmosetSocketServer(InetSocketAddress address)
     {
         super(address);
-        sockets = new HashSet<WebSocket>();
+        sockets = new HashSet<>();
     }
 
     public void distributeData(String s)
     {
-        for (WebSocket socket : sockets) {
-            socket.send(s);
-        }
+        sockets.stream().forEach(socket -> socket.send(s));
     }
 
     @Override
