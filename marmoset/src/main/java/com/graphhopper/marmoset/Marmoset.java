@@ -35,6 +35,7 @@ public class Marmoset {
                 public void run()
                 {
                     int i = 0;
+                    mh.startSimulation();
                     while (true)
                     {
                         System.out.println("Running iteration " + i);

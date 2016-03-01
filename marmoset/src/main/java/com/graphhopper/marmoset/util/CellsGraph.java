@@ -1,0 +1,69 @@
+package com.graphhopper.marmoset.util;
+
+import com.graphhopper.routing.util.AllEdgesIterator;
+import com.graphhopper.storage.Graph;
+
+/**
+ * Created by alexander on 01/03/2016.
+ */
+public class CellsGraph {
+    private final int cellSize;
+    private Graph graph;
+    private byte[][] cells;
+
+    public CellsGraph(Graph graph, int cellSize) {
+        this.cellSize = cellSize;
+        this.graph = graph;
+    }
+
+    public void init()
+    {
+        AllEdgesIterator iterator = graph.getAllEdges();
+        double totalDist = 0;
+        cells = new byte[iterator.getMaxId()][];
+        while (iterator.next())
+        {
+            cells[iterator.getEdge()] = new byte[(int) (iterator.getDistance() / cellSize)];
+            totalDist += iterator.getDistance();
+        }
+    }
+
+    public int getCellCount(int edgeId)
+    {
+        if (edgeId >= cells.length)
+            throw new ArrayIndexOutOfBoundsException(
+                    String.format("EdgeId '%d' out of bounds (max %d)", edgeId, cells.length));
+        return cells[edgeId].length;
+    }
+
+    public int freeCellsAhead(int edgeId, int cellId, int max)
+    {
+        int move = 0;
+        while (cellId + move < cells[edgeId].length && move <= max)
+        {
+            if (cells[edgeId][cellId + move] == 0)
+                move++;
+            else
+                return move;
+        }
+
+        return move;
+    }
+
+    public void set(int edgeId, int cellId, int v)
+    {
+        set(edgeId, cellId, (byte) v);
+    }
+
+    public void set(int edgeId, int cellId, byte v)
+    {
+        if (edgeId >= cells.length)
+            throw new ArrayIndexOutOfBoundsException(
+                    String.format("EdgeId '%d' out of bounds (max %d)", edgeId, cells.length));
+        if (cellId >= cells[edgeId].length)
+            throw new ArrayIndexOutOfBoundsException(
+                    String.format("CellId '%d' out of bounds (max %d)", cellId, cells[edgeId].length));
+
+        cells[edgeId][cellId] = v;
+    }
+}

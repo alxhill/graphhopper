@@ -1,6 +1,7 @@
 package com.graphhopper.marmoset;
 
 import com.graphhopper.GraphHopper;
+import com.graphhopper.marmoset.util.CellsGraph;
 import com.graphhopper.marmoset.util.Location;
 import com.graphhopper.util.CmdArgs;
 
@@ -8,6 +9,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 /**
  * Created by alexander on 15/02/2016.
@@ -15,6 +17,7 @@ import java.util.stream.IntStream;
 public class MarmosetHopper {
 
     private GraphHopper hopper;
+    private CellsGraph cellsGraph;
     private List<Vehicle> vehicles;
 
     public MarmosetHopper() {
@@ -38,6 +41,10 @@ public class MarmosetHopper {
         args.put("osmreader.osm", "british-isles-latest.osm.pbf");
         hopper.init(args);
         hopper.importOrLoad();
+
+        cellsGraph = new CellsGraph(hopper.getGraphHopperStorage(), 10);
+        cellsGraph.init();
+
         int count = args.getInt("marmoset.vehicles", 1000);
         Random latRan = new Random(123);
         Random lonRan = new Random(456);
@@ -50,8 +57,17 @@ public class MarmosetHopper {
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
+    public void startSimulation()
+    {
+        vehicles.parallelStream().forEach(Vehicle::init);
+    }
+
     public void timestep() {
-        vehicles.parallelStream().forEach(Vehicle::calculateStep);
+        vehicles.stream().forEach(Vehicle::accelerationStep);
+        vehicles.stream().forEach(Vehicle::slowStep);
+        vehicles.stream().forEach(Vehicle::randomStep);
+        vehicles.stream().forEach(Vehicle::moveStep);
+        vehicles.stream().forEach(Vehicle::updateLocation);
     }
 
     public String getVehicleData() {
@@ -63,4 +79,8 @@ public class MarmosetHopper {
         return hopper;
     }
 
+    public CellsGraph getCellsGraph()
+    {
+        return cellsGraph;
+    }
 }
