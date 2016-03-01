@@ -17,8 +17,6 @@ import java.util.Random;
  * Created by alexander on 16/02/2016.
  */
 public class Vehicle {
-    private final long DT = 1000;
-
     private static int maxId = 0;
     private final int id;
 
@@ -35,13 +33,11 @@ public class Vehicle {
     private float slowProb;
     private byte maxVelocity = 5;
 
-    private long time;
     private CellsGraph cg;
 
     public Vehicle(MarmosetHopper hopper, Location start, Location dest)
     {
-        time = 0;
-        slowProb = 0.5f;
+        slowProb = 0.0f;
         this.hopper = hopper;
         this.dest = dest;
         this.loc = start;
@@ -77,10 +73,11 @@ public class Vehicle {
     private int freeCells = -1;
     public void accelerationStep()
     {
-        freeCells = cg.freeCellsAhead(edgeId, cellId, v + 1);
+        freeCells = cg.freeCellsAhead(edgeId, cellId);
         System.out.println(id + "freecells:"+freeCells + "V:"+v);
-        if (freeCells >= v && v < maxVelocity)
+        if (freeCells > v+1 && v < maxVelocity)
         {
+            System.out.println("Accelerating");
             v++;
         }
     }
@@ -89,20 +86,23 @@ public class Vehicle {
     {
         if (freeCells < v)
         {
-            v = (byte) (freeCells - 1);
+            System.out.println("Slowing");
+            v = (byte) (freeCells);
         }
     }
 
     public void randomStep()
     {
-        if (v > 0 && Math.random() > slowProb)
+        if (v > 0 && Math.random() < slowProb)
         {
+            System.out.println("Randomly slowing");
             v--;
         }
     }
 
     public void moveStep()
     {
+        System.out.println("Moving from " + cellId + " to " + (cellId + v));
         cg.set(edgeId, cellId, 0);
         cellId += v;
         cg.set(edgeId, cellId, v);
@@ -121,7 +121,8 @@ public class Vehicle {
             System.out.println("Path is empty, not moving...");
             return;
         }
-        System.out.println("size:" + path.getSize());
+        System.out.println("velocity:" + v);
+        System.out.println("progress:" + progress);
 
         DistanceCalc dc = new DistanceCalc2D();
         double dist = path.calcDistance(dc);

@@ -36,18 +36,18 @@ public class CellsGraph {
         return cells[edgeId].length;
     }
 
-    public int freeCellsAhead(int edgeId, int cellId, int max)
+    public int freeCellsAhead(int edgeId, int cellId)
     {
-        int move = 0;
-        while (cellId + move < cells[edgeId].length && move <= max)
+        int move = 1;
+        while (cellId + move < cells[edgeId].length)
         {
             if (cells[edgeId][cellId + move] == 0)
                 move++;
             else
-                return move;
+                return move-1;
         }
 
-        return move;
+        return move-1;
     }
 
     public void set(int edgeId, int cellId, int v)
