@@ -19,14 +19,14 @@ public class Vehicle {
     private static int maxId = 0;
     private final int id;
 
-    private GraphHopper hopper;
+    private MarmosetHopper hopper;
     private Location loc;
     private Location dest;
     private boolean finished;
 
     private long time;
 
-    public Vehicle(GraphHopper hopper, Location start, Location dest)
+    public Vehicle(MarmosetHopper hopper, Location start, Location dest)
     {
         time = 0;
         this.hopper = hopper;
@@ -53,7 +53,8 @@ public class Vehicle {
         if (il == null)
         {
             GHRequest request = new GHRequest(loc.getLat(), loc.getLon(), dest.getLat(), dest.getLon());
-            GHResponse response = hopper.route(request);
+            GraphHopper gh = hopper.getGraphHopper();
+            GHResponse response = gh.route(request);
             if (response.hasErrors()) {
                 System.out.println("Response has errors, dumping:");
                 response.getErrors().stream().forEach(Throwable::printStackTrace);

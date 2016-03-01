@@ -7,7 +7,7 @@ import com.graphhopper.util.CmdArgs;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.stream.IntStream;
 
 /**
  * Created by alexander on 15/02/2016.
@@ -38,17 +38,16 @@ public class MarmosetHopper {
         args.put("osmreader.osm", "british-isles-latest.osm.pbf");
         hopper.init(args);
         hopper.importOrLoad();
-        int count = 1000;
+        int count = args.getInt("marmoset.vehicles", 1000);
         Random latRan = new Random(123);
         Random lonRan = new Random(456);
 
-        LinkedList<Double> longitudes = lonRan.doubles(-0.5, 0.25).limit(count * 2).boxed().collect(Collectors.toCollection(LinkedList::new));
-        LinkedList<Double> latitudes = latRan.doubles(51.2, 51.7).limit(count * 2).boxed().collect(Collectors.toCollection(LinkedList::new));
+        ArrayList<Double> lons = lonRan.doubles(-0.5, 0.25).limit(count * 2).boxed().collect(Collectors.toCollection(ArrayList::new));
+        ArrayList<Double> lats = latRan.doubles(51.2, 51.7).limit(count * 2).boxed().collect(Collectors.toCollection(ArrayList::new));
 
-        while (count-- > 0)
-        {
-            vehicles.add(new Vehicle(hopper, new Location(latitudes.poll(), longitudes.poll()), new Location(latitudes.poll(), longitudes.poll())));
-        }
+        vehicles = IntStream.range(0, count).map(c -> c * 2)
+                .mapToObj(c -> new Vehicle(this, new Location(lats.get(c), lons.get(c)), new Location(c+1, c+1)))
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     public void timestep() {
@@ -58,4 +57,10 @@ public class MarmosetHopper {
     public String getVehicleData() {
         return vehicles.parallelStream().map(Vehicle::toString).collect(Collectors.joining(","));
     }
+
+    public GraphHopper getGraphHopper()
+    {
+        return hopper;
+    }
+
 }
