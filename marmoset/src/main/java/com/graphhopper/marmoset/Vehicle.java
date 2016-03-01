@@ -32,7 +32,6 @@ public class Vehicle {
     private boolean finished;
 
     private int edgeId;
-    private int adjId;
     private int cellId;
 
     private byte v; // velocity
@@ -62,7 +61,7 @@ public class Vehicle {
     public void init()
     {
         cellId = 0; // TODO: figure out which cell the vehicle should start at
-        v = 0;
+        v = 1;
 
         cg = hopper.getCellsGraph();
 
@@ -94,7 +93,8 @@ public class Vehicle {
     public void accelerationStep()
     {
         freeCells = cg.freeCellsAhead(edgeId, cellId);
-        System.out.println(id + "freecells:"+freeCells + "V:"+v);
+        int c = cg.getCellCount(cellId);
+        System.out.println(id + "freecells:"+freeCells + "V:"+v + "count:"+ c);
         if (freeCells > v+1 && v < maxVelocity)
         {
             System.out.println("Accelerating");
@@ -130,7 +130,7 @@ public class Vehicle {
 
     public void updateLocation()
     {
-        double progress = cellId / (float) (cg.getCellCount(edgeId)+1);
+        double progress = (cellId+1)/ (float) (cg.getCellCount(edgeId));
         EdgeIteratorState edge = edgeList.get(edgeIndex);
 
         PointList path = edge.fetchWayGeometry(3);
