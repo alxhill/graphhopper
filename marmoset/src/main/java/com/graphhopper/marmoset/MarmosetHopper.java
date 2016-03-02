@@ -4,12 +4,12 @@ import com.graphhopper.GraphHopper;
 import com.graphhopper.marmoset.util.CellsGraph;
 import com.graphhopper.marmoset.util.Location;
 import com.graphhopper.util.CmdArgs;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 /**
  * Created by alexander on 15/02/2016.
@@ -59,7 +59,8 @@ public class MarmosetHopper {
 
     public void startSimulation()
     {
-        vehicles.parallelStream().forEach(Vehicle::init);
+        vehicles.stream().forEach(Vehicle::init);
+        vehicles = vehicles.stream().filter(v -> !v.isFinished()).collect(Collectors.toList());
     }
 
     public void timestep() {
@@ -68,6 +69,8 @@ public class MarmosetHopper {
         vehicles.stream().forEach(Vehicle::randomStep);
         vehicles.stream().forEach(Vehicle::moveStep);
         vehicles.stream().forEach(Vehicle::updateLocation);
+
+        vehicles = vehicles.stream().filter(v -> !v.isFinished()).collect(Collectors.toList());
     }
 
     public String getVehicleData() {

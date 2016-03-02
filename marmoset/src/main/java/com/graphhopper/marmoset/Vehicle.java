@@ -42,7 +42,7 @@ public class Vehicle {
 
     public Vehicle(MarmosetHopper hopper, Location start, Location dest)
     {
-        slowProb = 0.0f;
+        slowProb = 0.2f;
         this.hopper = hopper;
         this.dest = dest;
         this.loc = start;
@@ -65,11 +65,14 @@ public class Vehicle {
         GraphHopper gh = hopper.getGraphHopper();
 
         GHRequest ghRequest = new GHRequest(loc.getLat(), loc.getLon(), dest.getLat(), dest.getLon());
-        logger.debug(loc + "->" + dest);
         GHResponse ghResponse = new GHResponse();
         List<Path> paths = gh.calcPaths(ghRequest, ghResponse);
         if (ghResponse.hasErrors())
-            System.out.println("ERRORS:" + ghResponse.getErrors().stream().map(Throwable::toString).collect(Collectors.joining("\n")));
+        {
+            logger.error("ERRORS:" + ghResponse.getErrors().stream().map(Throwable::toString).collect(Collectors.joining("\n")));
+            finished = true;
+            return;
+        }
 
         edgeList = paths.get(0).calcEdges();
         // start from 1 to avoid the 'fake' edge added by the query graph
@@ -79,22 +82,26 @@ public class Vehicle {
         int maxId = edgeList.stream().mapToInt(EdgeIteratorState::getEdge).max().getAsInt();
         int minId = edgeList.stream().mapToInt(EdgeIteratorState::getEdge).min().getAsInt();
         edgeId = e.getEdge();
-        logger.debug("edge id: " + edgeId);
-        logger.debug("max edge id: " + maxId);
-        logger.debug("min edge id: " + minId);
+        logger.info("edge id: " + edgeId);
+        logger.info("max edge id: " + maxId);
+        logger.info("min edge id: " + minId);
 
         cg.set(edgeId, cellId, v);
+
+        finished = false;
     }
 
     private int freeCells = -1;
     public void accelerationStep()
     {
+        assert !isFinished();
+
         freeCells = cg.freeCellsAhead(edgeId, cellId);
         int c = cg.getCellCount(edgeId);
-        logger.debug(id + "freecells:"+freeCells + "V:"+v + "count:"+ c);
+        logger.info(id + "freecells:"+freeCells + "V:"+v + "count:"+ c);
         if (freeCells > v+1 && v < maxVelocity)
         {
-            logger.debug("Accelerating");
+            logger.info("Accelerating");
             v++;
         }
     }
@@ -103,7 +110,7 @@ public class Vehicle {
     {
         if (freeCells < v)
         {
-            logger.debug("Slowing");
+            logger.info("Slowing");
             v = (byte) (freeCells);
         }
     }
@@ -112,14 +119,14 @@ public class Vehicle {
     {
         if (v > 0 && Math.random() < slowProb)
         {
-            logger.debug("Randomly slowing");
+            logger.info("Randomly slowing");
             v--;
         }
     }
 
     public void moveStep()
     {
-        logger.debug("Moving from " + cellId + " to " + (cellId + v));
+        logger.info("Moving from " + cellId + " to " + (cellId + v));
         cg.set(edgeId, cellId, 0);
         cellId += v;
         cg.set(edgeId, cellId, v);
@@ -133,23 +140,23 @@ public class Vehicle {
         PointList path = edge.fetchWayGeometry(3);
         if (path.isEmpty())
         {
-            logger.debug("Path is empty, not moving...");
+            logger.info("Path is empty, not moving...");
             return;
         }
-        logger.debug("velocity:" + v);
-        logger.debug("progress:" + progress);
+        logger.info("velocity:" + v);
+        logger.info("progress:" + progress);
 
         DistanceCalc dc = new DistanceCalc2D();
         double dist = path.calcDistance(dc);
-        logger.debug("dist: " + dist);
+        logger.info("dist: " + dist);
         double distTravelled = progress * dist;
         double currDist = 0;
-        logger.debug("start(%d): %f + %f\n", id,currDist,distTravelled);
+        logger.info(String.format("start(%d): %f + %f", id, currDist, distTravelled));
         int i = 0;
         while (i < path.getSize()-1 && currDist <= distTravelled)
         {
             double nextDist = dc.calcDist(path.getLat(i), path.getLon(i), path.getLat(i + 1), path.getLon(i + 1));
-            logger.debug("-%d|%d: %f + %f\n", id,i,currDist,nextDist);
+            logger.info(String.format("-%d|%d: %f + %f", id,i,currDist,nextDist));
             if (currDist + nextDist > distTravelled)
             {
                 double partProgress = (distTravelled - currDist)/nextDist;
