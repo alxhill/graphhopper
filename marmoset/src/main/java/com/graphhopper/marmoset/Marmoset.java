@@ -2,6 +2,7 @@ package com.graphhopper.marmoset;
 
 import fi.iki.elonen.SimpleWebServer;
 import fi.iki.elonen.util.ServerRunner;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;

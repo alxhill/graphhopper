@@ -19,13 +19,11 @@ public class CellsGraph {
     public void init()
     {
         AllEdgesIterator iterator = graph.getAllEdges();
-        double totalDist = 0;
         cells = new byte[iterator.getMaxId()][];
         while (iterator.next())
         {
             int cellCount = Math.max(1, (int) (iterator.getDistance() / cellSize));
             cells[iterator.getEdge()] = new byte[cellCount];
-            totalDist += iterator.getDistance();
         }
     }
 
