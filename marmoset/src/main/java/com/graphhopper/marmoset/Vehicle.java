@@ -42,7 +42,7 @@ public class Vehicle {
 
     public Vehicle(MarmosetHopper hopper, Location start, Location dest)
     {
-        slowProb = 0.2f;
+        slowProb = 0.0f;
         this.hopper = hopper;
         this.dest = dest;
         this.loc = start;
@@ -86,7 +86,7 @@ public class Vehicle {
         logger.info("max edge id: " + maxId);
         logger.info("min edge id: " + minId);
 
-        cg.set(edgeId, cellId, v);
+        cg.set(edgeId, cellId, true);
 
         finished = false;
     }
@@ -97,8 +97,6 @@ public class Vehicle {
         assert !isFinished();
 
         freeCells = cg.freeCellsAhead(edgeId, cellId);
-        int c = cg.getCellCount(edgeId);
-        logger.info(id + "freecells:"+freeCells + "V:"+v + "count:"+ c);
         if (freeCells > v+1 && v < maxVelocity)
         {
             logger.info("Accelerating");
@@ -117,6 +115,8 @@ public class Vehicle {
 
     public void randomStep()
     {
+        int c = cg.getCellCount(edgeId);
+        logger.info(id + "freecells:"+freeCells + "V:"+v + "count:"+ c);
         if (v > 0 && Math.random() < slowProb)
         {
             logger.info("Randomly slowing");
@@ -127,9 +127,9 @@ public class Vehicle {
     public void moveStep()
     {
         logger.info("Moving from " + cellId + " to " + (cellId + v));
-        cg.set(edgeId, cellId, 0);
+        cg.set(edgeId, cellId, false);
         cellId += v;
-        cg.set(edgeId, cellId, v);
+        cg.set(edgeId, cellId, true);
     }
 
     public void updateLocation()

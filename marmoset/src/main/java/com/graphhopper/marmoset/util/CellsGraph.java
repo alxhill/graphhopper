@@ -9,7 +9,7 @@ import com.graphhopper.storage.Graph;
 public class CellsGraph {
     private final int cellSize;
     private Graph graph;
-    private byte[][] cells;
+    private boolean[][] cells;
 
     public CellsGraph(Graph graph, int cellSize) {
         this.cellSize = cellSize;
@@ -19,11 +19,11 @@ public class CellsGraph {
     public void init()
     {
         AllEdgesIterator iterator = graph.getAllEdges();
-        cells = new byte[iterator.getMaxId()][];
+        cells = new boolean[iterator.getMaxId()][];
         while (iterator.next())
         {
             int cellCount = Math.max(1, (int) (iterator.getDistance() / cellSize));
-            cells[iterator.getEdge()] = new byte[cellCount];
+            cells[iterator.getEdge()] = new boolean[cellCount];
         }
     }
 
@@ -40,7 +40,7 @@ public class CellsGraph {
         int move = 1;
         while (cellId + move < cells[edgeId].length)
         {
-            if (cells[edgeId][cellId + move] == 0)
+            if (!cells[edgeId][cellId + move])
                 move++;
             else
                 return move-1;
@@ -49,12 +49,7 @@ public class CellsGraph {
         return move-1;
     }
 
-    public void set(int edgeId, int cellId, int v)
-    {
-        set(edgeId, cellId, (byte) v);
-    }
-
-    public void set(int edgeId, int cellId, byte v)
+    public void set(int edgeId, int cellId, boolean hasVehicle)
     {
         if (edgeId >= cells.length)
             throw new ArrayIndexOutOfBoundsException(
@@ -63,6 +58,6 @@ public class CellsGraph {
             throw new ArrayIndexOutOfBoundsException(
                     String.format("CellId '%d' out of bounds (max %d) for edge %d", cellId, cells[edgeId].length, edgeId));
 
-        cells[edgeId][cellId] = v;
+        cells[edgeId][cellId] = hasVehicle;
     }
 }
