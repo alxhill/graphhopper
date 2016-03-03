@@ -69,7 +69,7 @@ public class Vehicle {
         List<Path> paths = gh.calcPaths(ghRequest, ghResponse);
         if (ghResponse.hasErrors())
         {
-            System.out.println("ERRORS:" + ghResponse.getErrors().stream().map(Throwable::toString).collect(Collectors.joining("\n")));
+            logger.error("Routing failed:" + ghResponse.getErrors().stream().map(Throwable::toString).collect(Collectors.joining("\n")));
             finished = true;
             return;
         }
@@ -82,9 +82,9 @@ public class Vehicle {
         int maxId = edgeList.stream().mapToInt(EdgeIteratorState::getEdge).max().getAsInt();
         int minId = edgeList.stream().mapToInt(EdgeIteratorState::getEdge).min().getAsInt();
         edgeId = e.getEdge();
-        logger.info("edge id: " + edgeId);
-        logger.info("max edge id: " + maxId);
-        logger.info("min edge id: " + minId);
+        logger.debug("edge id: " + edgeId);
+        logger.debug("max edge id: " + maxId);
+        logger.debug("min edge id: " + minId);
 
         cg.set(edgeId, cellId, true);
 
@@ -99,7 +99,7 @@ public class Vehicle {
         freeCells = cg.freeCellsAhead(edgeId, cellId);
         if (freeCells > v+1 && v < maxVelocity)
         {
-            logger.info("Accelerating");
+            logger.debug("Accelerating");
             v++;
         }
     }
@@ -108,7 +108,7 @@ public class Vehicle {
     {
         if (freeCells < v)
         {
-            logger.info("Slowing");
+            logger.debug("Slowing");
             v = (byte) (freeCells);
         }
     }
@@ -116,17 +116,17 @@ public class Vehicle {
     public void randomStep()
     {
         int c = cg.getCellCount(edgeId);
-        logger.info(id + "freecells:"+freeCells + "V:"+v + "count:"+ c);
+        logger.debug(id + "freecells:"+freeCells + "V:"+v + "count:"+ c);
         if (v > 0 && Math.random() < slowProb)
         {
-            logger.info("Randomly slowing");
+            logger.debug("Randomly slowing");
             v--;
         }
     }
 
     public void moveStep()
     {
-        logger.info("Moving from " + cellId + " to " + (cellId + v));
+        logger.debug("Moving from " + cellId + " to " + (cellId + v));
         cg.set(edgeId, cellId, false);
         cellId += v;
         cg.set(edgeId, cellId, true);
@@ -140,23 +140,23 @@ public class Vehicle {
         PointList path = edge.fetchWayGeometry(3);
         if (path.isEmpty())
         {
-            logger.info("Path is empty, not moving...");
+            logger.debug("Path is empty, not moving...");
             return;
         }
-        logger.info("velocity:" + v);
-        logger.info("progress:" + progress);
+        logger.debug("velocity:" + v);
+        logger.debug("progress:" + progress);
 
         DistanceCalc dc = new DistanceCalc2D();
         double dist = path.calcDistance(dc);
-        logger.info("dist: " + dist);
+        logger.debug("dist: " + dist);
         double distTravelled = progress * dist;
         double currDist = 0;
-        logger.info(String.format("start(%d): %f + %f", id, currDist, distTravelled));
+        logger.debug(String.format("start(%d): %f + %f", id, currDist, distTravelled));
         int i = 0;
         while (i < path.getSize()-1 && currDist <= distTravelled)
         {
             double nextDist = dc.calcDist(path.getLat(i), path.getLon(i), path.getLat(i + 1), path.getLon(i + 1));
-            logger.info(String.format("-%d|%d: %f + %f", id,i,currDist,nextDist));
+            logger.debug(String.format("-%d|%d: %f + %f", id,i,currDist,nextDist));
             if (currDist + nextDist > distTravelled)
             {
                 double partProgress = (distTravelled - currDist)/nextDist;
@@ -183,6 +183,7 @@ public class Vehicle {
         edgeIndex++;
         if (edgeIndex >= edgeList.size() - 1)
         {
+            logger.info("Vehicle " + id + " has reached destination");
             finished = true;
             return;
         }

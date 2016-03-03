@@ -33,24 +33,23 @@ public class MarmosetSocketServer extends WebSocketServer {
     @Override
     public void onOpen(WebSocket webSocket, ClientHandshake clientHandshake)
     {
-        System.out.println("OPEN!" + webSocket.toString());
+        logger.debug("Opened WebSocket:" + webSocket.getLocalSocketAddress() + "->" + webSocket.getRemoteSocketAddress());
         sockets.add(webSocket);
     }
 
     @Override
     public void onClose(WebSocket webSocket, int i, String s, boolean b)
     {
-        System.out.println("CLOSE!" + webSocket.toString());
+        logger.debug("Closed WebSocket:" + webSocket.getLocalSocketAddress() + "->" + webSocket.getRemoteSocketAddress());
         sockets.remove(webSocket);
     }
 
     @Override
     public void onMessage(WebSocket webSocket, String s)
     {
-        logger.info("Received message: " + s);
+        logger.debug("Received message: " + s);
         if (s.matches("start\\|\\d+"))
         {
-            logger.info("run message");
             String num = s.split("\\|")[1];
             logger.info("Starting simulation with " + num + " vehicles");
             Marmoset.run(Integer.valueOf(num, 10));
