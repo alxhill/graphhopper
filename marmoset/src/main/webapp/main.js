@@ -38,6 +38,15 @@ var carSet = {
 
     // start listening to the websocket and setup the callbacks
     init: function(count) {
+        if (this.ws)
+            this.ws.close();
+
+        if (this._cars) {
+            this._cars.forEach(function (c) {
+                c.remove();
+            });
+        }
+
         this.ws = new WebSocket("ws://localhost:8888");
         this.ws.onmessage = function (e) {
             this.processData(e.data);
@@ -83,5 +92,10 @@ Car.prototype = {
             this.marker.setLine(line);
         }
         this.marker.start();
+    },
+
+    remove: function() {
+        if (this.marker)
+            this.marker.remove();
     }
 }
