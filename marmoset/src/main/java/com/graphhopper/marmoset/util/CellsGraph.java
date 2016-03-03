@@ -7,11 +7,11 @@ import com.graphhopper.storage.Graph;
  * Created by alexander on 01/03/2016.
  */
 public class CellsGraph {
-    private final int cellSize;
+    private final double cellSize;
     private Graph graph;
     private boolean[][] cells;
 
-    public CellsGraph(Graph graph, int cellSize) {
+    public CellsGraph(Graph graph, double cellSize) {
         this.cellSize = cellSize;
         this.graph = graph;
     }

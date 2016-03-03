@@ -16,10 +16,20 @@ function initMap() {
     }).addTo(map);
 }
 
+function initButtons(carSet) {
+    document.getElementById("startSimulation").addEventListener("click", function() {
+        var count = document.getElementById("initVehicles").value;
+        console.log("Starting simulation with", count, "vehicles");
+        carSet.init(count);
+    });
+    document.getElementById("addVehicle").addEventListener("click", function () {
+        carSet.ws.send("addVehicle");
+    });
+}
 
 function initAll() {
     initMap();
-    carSet.init();
+    initButtons(carSet);
 }
 
 
@@ -27,14 +37,14 @@ var carSet = {
     _cars: [],
 
     // start listening to the websocket and setup the callbacks
-    init: function() {
+    init: function(count) {
         this.ws = new WebSocket("ws://localhost:8888");
         this.ws.onmessage = function (e) {
             this.processData(e.data);
         }.bind(this);
-        this.ws.onopen = function(e) {
-            e.target.send("run");
-        };
+        this.ws.onopen = function (e) {
+            this.ws.send("start|" + count);
+        }.bind(this);
     },
 
     // deals with the set of data that comes from the websocket

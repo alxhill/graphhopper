@@ -2,6 +2,7 @@ package com.graphhopper.marmoset;
 
 import fi.iki.elonen.SimpleWebServer;
 import fi.iki.elonen.util.ServerRunner;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
@@ -17,6 +18,8 @@ public class Marmoset {
     private static MarmosetSocketServer mss;
     private static boolean isRunning = false;
 
+    private static Logger logger = LoggerFactory.getLogger(Marmoset.class);
+
     public static void main(String[] args) throws IOException, InterruptedException
     {
         mh = new MarmosetHopper();
@@ -26,36 +29,39 @@ public class Marmoset {
         startWebSocketServer();
     }
 
-    public static void run()
+    public static void run(int initialVehicles)
     {
         if (!isRunning)
         {
             isRunning = true;
-            new Thread() {
-                @Override
-                public void run()
+            Runnable task = () -> {
+                int i = 0;
+                mh.startSimulation(initialVehicles);
+                while (true)
                 {
-                    int i = 0;
-                    mh.startSimulation();
-                    while (true)
+                    logger.info("===ITERATION [" + i + "]===");
+                    i++;
+                    mh.timestep();
+                    String data = mh.getVehicleData();
+                    mss.distributeData(data);
+                    try
                     {
-                        System.out.println("Running iteration " + i);
-                        i++;
-                        mh.timestep();
-                        String data = mh.getVehicleData();
-                        mss.distributeData(data);
-                        try
-                        {
-                            Thread.sleep(1000);
-                        }
-                        catch (InterruptedException e)
-                        {
-                            e.printStackTrace();
-                        }
+                        Thread.sleep(1000);
+                    }
+                    catch (InterruptedException e)
+                    {
+                        e.printStackTrace();
                     }
                 }
-            }.start();
+            };
+
+            new Thread(task).start();
         }
+    }
+
+    public static void addVehicle()
+    {
+        mh.addVehicle();
     }
 
     private static void startWebSocketServer()

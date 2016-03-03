@@ -69,7 +69,7 @@ public class Vehicle {
         List<Path> paths = gh.calcPaths(ghRequest, ghResponse);
         if (ghResponse.hasErrors())
         {
-            logger.error("ERRORS:" + ghResponse.getErrors().stream().map(Throwable::toString).collect(Collectors.joining("\n")));
+            System.out.println("ERRORS:" + ghResponse.getErrors().stream().map(Throwable::toString).collect(Collectors.joining("\n")));
             finished = true;
             return;
         }
