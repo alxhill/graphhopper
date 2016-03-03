@@ -181,6 +181,11 @@ public class Vehicle {
     private void nextEdge()
     {
         edgeIndex++;
+        if (edgeIndex >= edgeList.size() - 1)
+        {
+            finished = true;
+            return;
+        }
         edgeId = edgeList.get(edgeIndex).getEdge();
         cellId = 0;
     }
