@@ -45,6 +45,7 @@ var carSet = {
             this._cars.forEach(function (c) {
                 c.remove();
             });
+            this._cars = [];
         }
 
         this.ws = new WebSocket("ws://localhost:8888");
@@ -67,25 +68,29 @@ var carSet = {
             if (this._cars[index]) {
                 this._cars[index].moveTo(lat, lon);
             } else {
-                this._cars[index] = new Car(0, lat, lon);
+                this._cars[index] = new Car(index, lat, lon);
             }
         }
     }
-
 };
 
-
-var Car = function(road, lat, lon) {
-    this.road = road;
+var Car = function(id, lat, lon) {
+    this.id = id;
     this.pos = [lat, lon];
 };
 
 Car.prototype = {
+
     moveTo: function(lat, lon) {
         var line = [this.pos, [lat, lon]];
         this.pos = [lat, lon];
         if (this.marker == null) {
-            this.marker = L.animatedMarker(line, {icon: carIcon, distance: 1, interval: 1000});
+            this.marker = L.animatedMarker(line, {
+                icon: carIcon,
+                distance: 1,
+                interval: 1000,
+                title: "ID:" + this.id
+            });
             window.map.addLayer(this.marker);
         } else {
             this.marker.stop();
@@ -96,6 +101,6 @@ Car.prototype = {
 
     remove: function() {
         if (this.marker)
-            this.marker.remove();
+            window.map.removeLayer(this.marker);
     }
 }

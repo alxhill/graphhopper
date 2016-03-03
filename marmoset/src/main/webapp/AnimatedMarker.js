@@ -1,3 +1,20 @@
+function angleFromCoordinate(lat1, long1, lat2, long2) {
+
+  var dLon = (long2 - long1);
+
+  var y = Math.sin(dLon) * Math.cos(lat2);
+  var x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1)
+      * Math.cos(lat2) * Math.cos(dLon);
+
+  var brng = Math.atan2(y, x);
+
+  brng = brng * 180/ Math.PI;
+  brng += 270;
+  brng = (brng + 360) % 360;
+
+  return brng;
+}
+
 L.AnimatedMarker = L.Marker.extend({
   options: {
     // meters
@@ -69,6 +86,27 @@ L.AnimatedMarker = L.Marker.extend({
     if (L.DomUtil.TRANSITION) {
       if (this._icon) { this._icon.style[L.DomUtil.TRANSITION] = ('all ' + speed + 'ms linear'); }
       if (this._shadow) { this._shadow.style[L.DomUtil.TRANSITION] = 'all ' + speed + 'ms linear'; }
+    }
+
+
+
+    // Set the rotation of the marker
+    if (this._icon && this._i == 0) {
+      // gets overwritten by leaflet if done without setTimeout
+      var i = this._i;
+      setTimeout(function () {
+        var s = this._latlngs[i];
+        var d = this._latlngs[i+1];
+        console.log(this._latlngs, this._i, i, s, d);
+        var angle = angleFromCoordinate(s[0], s[1], d[0], d[1]);
+        console.log(angle);
+
+        // hacky way of setting transform property without removing what leaflet does
+        var curStyle = this._icon.style[L.DomUtil.TRANSFORM].split(" ");
+        if (curStyle.length > 3)
+          curStyle.pop();
+        this._icon.style[L.DomUtil.TRANSFORM] = curStyle.join(" ") + " rotate("+ angle +"deg)";
+      }.bind(this), 0);
     }
 
     // Move to the next vertex
