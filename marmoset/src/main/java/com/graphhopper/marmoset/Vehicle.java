@@ -55,6 +55,12 @@ public class Vehicle {
         return finished;
     }
 
+    private void finish(String error)
+    {
+        logger.error(error);
+        finished = true;
+    }
+
     public void init()
     {
         cellId = 0; // TODO: figure out which cell the vehicle should start at
@@ -69,14 +75,25 @@ public class Vehicle {
         List<Path> paths = gh.calcPaths(ghRequest, ghResponse);
         if (ghResponse.hasErrors())
         {
-            logger.error("Routing failed:" + ghResponse.getErrors().stream().map(Throwable::toString).collect(Collectors.joining("\n")));
-            finished = true;
+            finish("Routing failed:" + ghResponse.getErrors().stream().map(Throwable::toString).collect(Collectors.joining("\n")));
+            return;
+        }
+
+        if (paths.size() == 0)
+        {
+            finish("No path found");
             return;
         }
 
         edgeList = paths.get(0).calcEdges();
         // start from 1 to avoid the 'fake' edge added by the query graph
         edgeIndex = 1;
+
+        if (edgeList.size() <= 1)
+        {
+            finish("Edge list too short");
+            return;
+        }
 
         EdgeIteratorState e = edgeList.get(edgeIndex);
         int maxId = edgeList.stream().mapToInt(EdgeIteratorState::getEdge).max().getAsInt();
