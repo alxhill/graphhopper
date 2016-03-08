@@ -3,7 +3,11 @@ package com.graphhopper.marmoset;
 import com.graphhopper.GraphHopper;
 import com.graphhopper.marmoset.util.CellsGraph;
 import com.graphhopper.marmoset.util.Location;
+import com.graphhopper.routing.util.EncodingManager;
+import com.graphhopper.routing.util.FlagEncoder;
 import com.graphhopper.util.CmdArgs;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
@@ -18,6 +22,8 @@ public class MarmosetHopper {
     private GraphHopper hopper;
     private CellsGraph cellsGraph;
     private List<Vehicle> vehicles;
+
+    private static Logger logger = LoggerFactory.getLogger(MarmosetHopper.class);
 
     public MarmosetHopper() {
         hopper = new GraphHopper();
@@ -44,7 +50,23 @@ public class MarmosetHopper {
 
         double cellSize = args.getDouble("marmoset.cellsize", 10.0);
         cellsGraph = new CellsGraph(hopper.getGraphHopperStorage().getBaseGraph(), cellSize);
-        cellsGraph.init();
+        cellsGraph.init(getFlagEncoder());
+    }
+
+    public FlagEncoder getFlagEncoder()
+    {
+        EncodingManager em = hopper.getEncodingManager();
+        List<FlagEncoder> encoders = em.fetchEdgeEncoders();
+        if (encoders.size() <= 0)
+        {
+            logger.error("No flag encoders found!");
+            return null;
+        }
+
+        if (encoders.size() > 1)
+            logger.warn("Multiple encoders found - using the first (" + encoders.get(0).toString() + ")");
+
+        return encoders.get(0);
     }
 
     private Random latRan = new Random(123);

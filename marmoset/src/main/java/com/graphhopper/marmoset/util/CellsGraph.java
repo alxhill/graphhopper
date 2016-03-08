@@ -1,6 +1,7 @@
 package com.graphhopper.marmoset.util;
 
 import com.graphhopper.routing.util.AllEdgesIterator;
+import com.graphhopper.routing.util.FlagEncoder;
 import com.graphhopper.storage.Graph;
 
 /**
@@ -10,20 +11,28 @@ public class CellsGraph {
     private final double cellSize;
     private Graph graph;
     private boolean[][] cells;
+    private boolean[][] reverseCells;
 
     public CellsGraph(Graph graph, double cellSize) {
         this.cellSize = cellSize;
         this.graph = graph;
+
     }
 
-    public void init()
+    public void init(FlagEncoder fe)
     {
         AllEdgesIterator iterator = graph.getAllEdges();
         cells = new boolean[iterator.getMaxId()][];
+        reverseCells = new boolean[iterator.getMaxId()][];
         while (iterator.next())
         {
             int cellCount = Math.max(1, (int) (iterator.getDistance() / cellSize));
-            cells[iterator.getEdge()] = new boolean[cellCount];
+
+            if (fe.isForward(iterator.getFlags()))
+                cells[iterator.getEdge()] = new boolean[cellCount];
+
+            if (fe.isBackward(iterator.getFlags()))
+                reverseCells[iterator.getEdge()] = new boolean[cellCount];
         }
     }
 
