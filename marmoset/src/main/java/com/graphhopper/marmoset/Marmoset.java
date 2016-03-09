@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 import java.util.stream.IntStream;
 
 /**
@@ -61,7 +62,7 @@ public class Marmoset {
                         logger.info("===ITERATION [" + i + "]===");
                         i++;
                         mh.timestep();
-                        String data = mh.getVehicleData();
+                        ByteBuffer data = mh.getVehicleBytes();
                         mss.distributeData(data);
                     }
                     try

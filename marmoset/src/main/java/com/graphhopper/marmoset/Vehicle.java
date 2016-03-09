@@ -11,6 +11,7 @@ import com.graphhopper.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -217,4 +218,10 @@ public class Vehicle {
         return String.format("%d|%s|%d", id, loc.toString(), v);
     }
 
+    public void addToBuffer(ByteBuffer b)
+    {
+        int pos = b.position();
+        b.putInt(id).putInt(v).putDouble(loc.getLat()).putDouble(loc.getLon());
+        logger.debug(String.format("[%d]%d|%d|%f|%f", id, b.getInt(pos), b.getInt(pos + 4), b.getDouble(pos + 8), b.getDouble(pos + 16)));
+    }
 }

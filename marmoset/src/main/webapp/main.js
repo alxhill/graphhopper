@@ -59,6 +59,7 @@ var carSet = {
         }
 
         this.ws = new WebSocket("ws://localhost:8888");
+        this.ws.binaryType = "arraybuffer";
         this.ws.onmessage = function (e) {
             this.processData(e.data);
         }.bind(this);
@@ -82,13 +83,15 @@ var carSet = {
 
     // deals with the set of data that comes from the websocket
     processData: function(data) {
-        var msgs = data.split(",");
-        for (var i = 0; i < msgs.length; i++) {
-            var msg = msgs[i].split("|");
-            var lat = parseFloat(msg[1]);
-            var lon = parseFloat(msg[2]);
-            var vel = parseInt(msg[3]);
-            var index = parseInt(msg[0]);
+        if (!data instanceof ArrayBuffer) {
+            return;
+        }
+        var view = new DataView(data);
+        for (var i = 0; i < data.byteLength; i += 24) {
+            var index = view.getInt32(i);
+            var vel = view.getInt32(i + 4);
+            var lat = view.getFloat64(i + 8);
+            var lon = view.getFloat64(i + 16);
             if (this._cars[index]) {
                 this._cars[index].moveTo(lat, lon, vel);
             } else {
@@ -102,7 +105,7 @@ var Car = function(id, vel, lat, lon) {
     this.id = id;
     this.vel = vel;
     this.pos = [lat, lon];
-    this.moveTo(lat, lon);
+    this.moveTo(lat, lon, vel);
 };
 
 Car.prototype = {

@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -84,9 +85,17 @@ public class MarmosetHopper {
         vehicles = vehicles.stream().filter(v -> !v.isFinished()).collect(Collectors.toList());
     }
 
-    public synchronized String getVehicleData()
+    public synchronized String getVehicleString()
     {
-        return vehicles.parallelStream().map(Vehicle::toString).collect(Collectors.joining(","));
+        return vehicles.stream().map(Vehicle::toString).collect(Collectors.joining(","));
+    }
+
+    public synchronized ByteBuffer getVehicleBytes()
+    {
+        ByteBuffer buffer =  ByteBuffer.allocate(vehicles.size() * 4 * 6);
+        vehicles.stream().forEach(v -> v.addToBuffer(buffer));
+        buffer.rewind();
+        return buffer;
     }
 
     public GraphHopper getGraphHopper()

@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -29,6 +30,11 @@ public class MarmosetSocketServer extends WebSocketServer {
     public synchronized void distributeData(String s)
     {
         sockets.stream().forEach(socket -> socket.send(s));
+    }
+
+    public void distributeData(ByteBuffer data)
+    {
+        sockets.stream().forEach(socket -> socket.send(data));
     }
 
     @Override
