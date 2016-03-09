@@ -20,6 +20,7 @@ echo ""
 
 if [ "$ACTION" = "clean" ]; then
     ${MAVEN} clean
+    rm -rf british-isles-latest.osm-gh
 elif [ "$ACTION" = "build" ]; then
     ${MAVEN} --projects marmoset -DskipTests=true install assembly:single
 elif [ "$ACTION" = "rebuild" ]; then
