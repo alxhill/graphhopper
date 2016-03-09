@@ -7,15 +7,12 @@ import com.graphhopper.marmoset.util.CellIterator;
 import com.graphhopper.marmoset.util.CellsGraph;
 import com.graphhopper.marmoset.util.Location;
 import com.graphhopper.routing.Path;
-import com.graphhopper.routing.util.FlagEncoder;
-import com.graphhopper.storage.GraphHopperStorage;
 import com.graphhopper.util.*;
-import gnu.trove.list.TIntList;
-import javafx.scene.control.Cell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 /**
@@ -38,18 +35,21 @@ public class Vehicle {
 
     private byte v; // velocity
     private float slowProb;
+    private Random slowRand;
     private byte maxVelocity = 5;
 
     private CellsGraph cg;
 
     public Vehicle(MarmosetHopper hopper, Location start, Location dest)
     {
-        slowProb = 0.0f;
         this.hopper = hopper;
         this.dest = dest;
         this.loc = start;
         this.id = maxId++;
+
         finished = false;
+        slowProb = 0.4f;
+        slowRand = new Random(id);
     }
 
     public boolean isFinished()
@@ -139,7 +139,7 @@ public class Vehicle {
 
     public void randomStep()
     {
-        if (v > 0 && Math.random() < slowProb)
+        if (v > 0 && slowRand.nextDouble() < slowProb)
         {
             logger.debug("Randomly slowing");
             v--;
@@ -159,6 +159,12 @@ public class Vehicle {
         }
         cellId = c.getCellIndex();
         cg.set(route, cellId, true);
+
+        if (!route.hasNext() && cellId == cg.getCellCount(route) - 1)
+        {
+            finished = true;
+            logger.info("Vehicle " + id + " reached destination");
+        }
     }
 
     public void updateLocation()

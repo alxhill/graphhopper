@@ -30,6 +30,11 @@ public class VehicleEdgeIterator implements EdgeIterator {
         index = e.index;
     }
 
+    public boolean hasNext()
+    {
+        return index < edges.size() - 1;
+    }
+
     @Override
     public boolean next()
     {

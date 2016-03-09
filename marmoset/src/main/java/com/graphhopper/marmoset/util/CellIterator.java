@@ -23,9 +23,16 @@ public class CellIterator {
         cellIndex++;
         if (cellIndex >= cg.getCellCount(route))
         {
-            cellIndex = 0;
-            // TODO: deal with ending of routes
-            route.next();
+            if (route.hasNext())
+            {
+                cellIndex = 0;
+                route.next();
+            }
+            else
+            {
+                // allows repeated calls after reaching destination
+                cellIndex = cg.getCellCount(route) - 1;
+            }
         }
         return cg.get(route, cellIndex);
     }
