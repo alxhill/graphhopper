@@ -29,6 +29,8 @@ elif [ "$ACTION" = "run" ]; then
     ${JAVA} -ea -cp marmoset/target/marmoset-0.7-SNAPSHOT-with-dep.jar com.graphhopper.marmoset.Marmoset
 elif [ "$ACTION" = "test" ]; then
     ${MAVEN} test
+elif [ "$ACTION" = "lines" ]; then
+    find marmoset -name "*.java" -o -name "*.js" | xargs wc -l
 fi
 
 E_CODE=$?
