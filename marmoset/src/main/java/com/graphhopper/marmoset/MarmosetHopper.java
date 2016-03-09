@@ -51,24 +51,9 @@ public class MarmosetHopper {
         cellsGraph.init();
     }
 
-    private Random latRan = new Random(123);
-    private Random lonRan = new Random(456);
-    private double randBound(Random r, double low, double high)
-    {
-        double range = high - low;
-        return r.nextDouble() * range + low;
-    }
-
-    private Location randLondon()
-    {
-        double lat = randBound(latRan, 51.2, 51.7);
-        double lon = randBound(lonRan, -0.5, 0.25);
-        return new Location(lat, lon);
-    }
-
     public synchronized void addVehicle()
     {
-        Vehicle v = new Vehicle(this, randLondon(), randLondon());
+        Vehicle v = new Vehicle(this, Location.randLondon(), Location.randCentralLondon());
         v.init();
         if (v.isFinished())
             addVehicle();

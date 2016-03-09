@@ -13,7 +13,7 @@ function initMap() {
         maxZoom: 18,
         id: 'alxhill.p69lilm1',
         accessToken: 'pk.eyJ1IjoiYWx4aGlsbCIsImEiOiJjaWtyMnM5cTAwMDFzd2RrcWxjdW14dGlhIn0._vGArimDzlTVhET5T_GZzA'
-    }).addTo(map);
+    }).addTo(window.map);
 }
 
 function initButtons(carSet) {
@@ -64,38 +64,47 @@ var carSet = {
             var msg = msgs[i].split("|");
             var lat = parseFloat(msg[1]);
             var lon = parseFloat(msg[2]);
+            var vel = parseInt(msg[3]);
             var index = parseInt(msg[0]);
             if (this._cars[index]) {
-                this._cars[index].moveTo(lat, lon);
+                this._cars[index].moveTo(lat, lon, vel);
             } else {
-                this._cars[index] = new Car(index, lat, lon);
+                this._cars[index] = new Car(index, vel, lat, lon);
             }
         }
     }
 };
 
-var Car = function(id, lat, lon) {
+var Car = function(id, vel, lat, lon) {
     this.id = id;
+    this.vel = vel;
     this.pos = [lat, lon];
+    this.moveTo(lat, lon);
 };
 
 Car.prototype = {
 
-    moveTo: function(lat, lon) {
+    moveTo: function(lat, lon, vel) {
         var line = [this.pos, [lat, lon]];
+
+        this.vel = vel;
         this.pos = [lat, lon];
+
         if (this.marker == null) {
             this.marker = L.animatedMarker(line, {
                 icon: carIcon,
                 distance: 1,
                 interval: 1000,
-                title: "ID:" + this.id
-            });
+                clickable: true
+            }).on("click", function () {
+                this.labelVisible = !this.labelVisible;
+            }.bind(this));
             window.map.addLayer(this.marker);
         } else {
             this.marker.stop();
             this.marker.setLine(line);
         }
+        this.marker.bindLabel(""+this.id + "|" + this.vel, {noHide: false});
         this.marker.start();
     },
 

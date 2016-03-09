@@ -61,6 +61,10 @@ public class Vehicle {
     {
         if (error != null)
             logger.error(error);
+
+        if (route != null)
+            cg.set(route, cellId, false);
+
         finished = true;
     }
 
@@ -210,7 +214,7 @@ public class Vehicle {
     @Override
     public String toString()
     {
-        return String.format("%d|%s", id, loc.toString());
+        return String.format("%d|%s|%d", id, loc.toString(), v);
     }
 
 }
