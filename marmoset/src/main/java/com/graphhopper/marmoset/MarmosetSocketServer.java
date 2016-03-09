@@ -6,6 +6,7 @@ import org.java_websocket.server.WebSocketServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.HashSet;
@@ -31,6 +32,18 @@ public class MarmosetSocketServer extends WebSocketServer {
     }
 
     @Override
+    public void stop()
+    {
+        sockets.stream().forEach(WebSocket::close);
+        try
+        {
+            super.stop(100);
+        }
+        catch (IOException | InterruptedException ignored)
+        {}
+    }
+
+    @Override
     public void onOpen(WebSocket webSocket, ClientHandshake clientHandshake)
     {
         logger.debug("Opened WebSocket:" + webSocket.getLocalSocketAddress() + "->" + webSocket.getRemoteSocketAddress());
@@ -53,9 +66,10 @@ public class MarmosetSocketServer extends WebSocketServer {
             String num = s.split("\\|")[1];
             Marmoset.run(Integer.valueOf(num, 10));
         }
-        else if (s.equals("addVehicle"))
+        else if (s.matches("addVehicles\\|\\d+"))
         {
-            Marmoset.addVehicle();
+            int num = Integer.valueOf(s.split("\\|")[1], 10);
+            Marmoset.addVehicles(num);
         }
         else if (s.equals("pause"))
         {

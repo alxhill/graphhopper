@@ -29,7 +29,9 @@ function initButtons(carSet) {
     document.getElementById("pause").addEventListener("click", carSet.togglePause.bind(carSet));
 
     document.getElementById("addVehicle").addEventListener("click", function () {
-        carSet.ws.send("addVehicle");
+        var count = document.getElementById("initVehicles").value;
+        count = Math.max(1, count);
+        carSet.ws.send("addVehicles|" + count);
     });
 }
 

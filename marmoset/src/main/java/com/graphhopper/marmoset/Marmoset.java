@@ -1,5 +1,6 @@
 package com.graphhopper.marmoset;
 
+import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.SimpleWebServer;
 import fi.iki.elonen.util.ServerRunner;
 import org.slf4j.Logger;
@@ -8,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.stream.IntStream;
 
 /**
  * Created by alexander on 16/02/2016.
@@ -16,9 +18,11 @@ public class Marmoset {
 
     private static MarmosetHopper mh;
     private static MarmosetSocketServer mss;
+    private static NanoHTTPD fileServer;
     private static boolean isRunning = false;
 
     private static Logger logger = LoggerFactory.getLogger(Marmoset.class);
+    private static Thread marmosetThread;
 
     public static void main(String[] args) throws IOException, InterruptedException
     {
@@ -27,6 +31,19 @@ public class Marmoset {
 
         startFileServer();
         startWebSocketServer();
+
+        System.out.println("Press enter to terminate");
+        try {
+            System.in.read();
+        }
+        catch (Throwable ignored) {}
+
+        mss.stop();
+        fileServer.stop();
+        if (marmosetThread != null)
+        {
+            marmosetThread.interrupt();
+        }
     }
 
     public static void run(int initialVehicles)
@@ -37,7 +54,7 @@ public class Marmoset {
             Runnable task = () -> {
                 int i = 0;
                 mh.startSimulation(initialVehicles);
-                while (true)
+                while (!Thread.interrupted())
                 {
                     if (!mh.paused())
                     {
@@ -53,12 +70,13 @@ public class Marmoset {
                     }
                     catch (InterruptedException e)
                     {
-                        e.printStackTrace();
+                        return;
                     }
                 }
             };
 
-            new Thread(task).start();
+            marmosetThread = new Thread(task);
+            marmosetThread.start();
         }
         else if (mh.paused())
         {
@@ -71,9 +89,10 @@ public class Marmoset {
         mh.pause();
     }
 
-    public static void addVehicle()
+    public static void addVehicles(int count)
     {
-        mh.addVehicle();
+        System.out.println("Adding " + count + " vehicles");
+        IntStream.range(0, count).forEach(i -> mh.addVehicle());
     }
 
     private static void startWebSocketServer()
@@ -87,12 +106,16 @@ public class Marmoset {
 
     private static void startFileServer()
     {
-        final File rootDir = new File("marmoset/src/main/webapp").getAbsoluteFile();
-        new Thread() {
-            @Override
-            public void run() {
-                ServerRunner.executeInstance(new SimpleWebServer(null, 8080, rootDir, true, null));
-            }
-        }.start();
+        File rootDir = new File("marmoset/src/main/webapp").getAbsoluteFile();
+        fileServer = new SimpleWebServer(null, 8080, rootDir, true, null);
+        try
+        {
+            fileServer.start(5000, false);
+            System.out.println("File server started");
+        }
+        catch (IOException e)
+        {
+            System.err.println("Failed to start server: " + e);
+        }
     }
 }
