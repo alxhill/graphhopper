@@ -51,12 +51,15 @@ public class MarmosetSocketServer extends WebSocketServer {
         if (s.matches("start\\|\\d+"))
         {
             String num = s.split("\\|")[1];
-            logger.info("Starting simulation with " + num + " vehicles");
             Marmoset.run(Integer.valueOf(num, 10));
         }
         else if (s.equals("addVehicle"))
         {
             Marmoset.addVehicle();
+        }
+        else if (s.equals("pause"))
+        {
+            Marmoset.pause();
         }
     }
 

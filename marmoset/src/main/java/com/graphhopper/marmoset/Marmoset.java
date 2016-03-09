@@ -39,11 +39,14 @@ public class Marmoset {
                 mh.startSimulation(initialVehicles);
                 while (true)
                 {
-                    logger.info("===ITERATION [" + i + "]===");
-                    i++;
-                    mh.timestep();
-                    String data = mh.getVehicleData();
-                    mss.distributeData(data);
+                    if (!mh.paused())
+                    {
+                        logger.info("===ITERATION [" + i + "]===");
+                        i++;
+                        mh.timestep();
+                        String data = mh.getVehicleData();
+                        mss.distributeData(data);
+                    }
                     try
                     {
                         Thread.sleep(1000);
@@ -57,6 +60,15 @@ public class Marmoset {
 
             new Thread(task).start();
         }
+        else if (mh.paused())
+        {
+            mh.unpause();
+        }
+    }
+
+    public static void pause()
+    {
+        mh.pause();
     }
 
     public static void addVehicle()
@@ -83,6 +95,4 @@ public class Marmoset {
             }
         }.start();
     }
-
-
 }

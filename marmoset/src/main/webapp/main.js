@@ -22,6 +22,12 @@ function initButtons(carSet) {
         console.log("Starting simulation with", count, "vehicles");
         carSet.init(count);
     });
+
+    document.getElementById("start100").addEventListener("click", carSet.init.bind(carSet, 100));
+    document.getElementById("start1000").addEventListener("click", carSet.init.bind(carSet, 1000));
+    document.getElementById("join").addEventListener("click", carSet.init.bind(carSet, 0));
+    document.getElementById("pause").addEventListener("click", carSet.togglePause.bind(carSet));
+
     document.getElementById("addVehicle").addEventListener("click", function () {
         carSet.ws.send("addVehicle");
     });
@@ -38,6 +44,8 @@ var carSet = {
 
     // start listening to the websocket and setup the callbacks
     init: function(count) {
+        this.paused = false;
+
         if (this.ws)
             this.ws.close();
 
@@ -55,6 +63,19 @@ var carSet = {
         this.ws.onopen = function (e) {
             this.ws.send("start|" + count);
         }.bind(this);
+    },
+
+    togglePause: function(e) {
+        if (this.ws == null)
+            return;
+        if (this.paused) {
+            this.ws.send("start|0");
+            e.target.value = "Pause Simulation";
+        } else {
+            this.ws.send("pause");
+            e.target.value = "Resume Simulation";
+        }
+        this.paused = !this.paused;
     },
 
     // deals with the set of data that comes from the websocket

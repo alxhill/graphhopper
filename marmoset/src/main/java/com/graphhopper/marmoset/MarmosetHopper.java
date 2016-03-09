@@ -23,6 +23,8 @@ public class MarmosetHopper {
 
     private static Logger logger = LoggerFactory.getLogger(MarmosetHopper.class);
 
+    private boolean isPaused;
+
     public MarmosetHopper() {
         hopper = new GraphHopper();
         vehicles = new ArrayList<>();
@@ -30,6 +32,7 @@ public class MarmosetHopper {
 
     public void init()
     {
+        isPaused = false;
         CmdArgs args;
         try
         {
@@ -63,12 +66,15 @@ public class MarmosetHopper {
 
     public synchronized void startSimulation(int initialVehicles)
     {
+        logger.info("Starting simulation with " + initialVehicles + " vehicles");
         IntStream.range(0, initialVehicles).forEach(v -> addVehicle());
         vehicles = vehicles.stream().filter(v -> !v.isFinished()).collect(Collectors.toList());
     }
 
     public synchronized void timestep()
     {
+        if (isPaused)
+            return;
         vehicles.stream().forEach(Vehicle::accelerationStep);
         vehicles.stream().forEach(Vehicle::slowStep);
         vehicles.stream().forEach(Vehicle::randomStep);
@@ -92,4 +98,21 @@ public class MarmosetHopper {
     {
         return cellsGraph;
     }
+
+    public void pause()
+    {
+        logger.info("Pausing simulation");
+        isPaused = true;
+    }
+    public void unpause()
+    {
+        logger.info("Resuming simulation");
+        isPaused = false;
+    }
+
+    public boolean paused()
+    {
+        return isPaused;
+    }
+
 }
