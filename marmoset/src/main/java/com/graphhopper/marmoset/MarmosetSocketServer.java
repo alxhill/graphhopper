@@ -26,7 +26,7 @@ public class MarmosetSocketServer extends WebSocketServer {
         sockets = Collections.synchronizedSet(new HashSet<>());
     }
 
-    public void distributeData(String s)
+    public synchronized void distributeData(String s)
     {
         sockets.stream().forEach(socket -> socket.send(s));
     }
@@ -34,10 +34,9 @@ public class MarmosetSocketServer extends WebSocketServer {
     @Override
     public void stop()
     {
-        sockets.stream().forEach(WebSocket::close);
         try
         {
-            super.stop(100);
+            super.stop();
         }
         catch (IOException | InterruptedException ignored)
         {}
@@ -80,8 +79,7 @@ public class MarmosetSocketServer extends WebSocketServer {
     @Override
     public void onError(WebSocket webSocket, Exception e)
     {
-        System.out.println("Error :(");
-        sockets.remove(webSocket);
-        e.printStackTrace();
+        if (webSocket != null)
+            sockets.remove(webSocket);
     }
 }
