@@ -3,10 +3,15 @@ package com.graphhopper.marmoset;
 import com.graphhopper.GHRequest;
 import com.graphhopper.GHResponse;
 import com.graphhopper.GraphHopper;
+import com.graphhopper.marmoset.util.CellIterator;
 import com.graphhopper.marmoset.util.CellsGraph;
 import com.graphhopper.marmoset.util.Location;
 import com.graphhopper.routing.Path;
+import com.graphhopper.routing.util.FlagEncoder;
+import com.graphhopper.storage.GraphHopperStorage;
 import com.graphhopper.util.*;
+import gnu.trove.list.TIntList;
+import javafx.scene.control.Cell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,15 +33,12 @@ public class Vehicle {
     private Location dest;
     private boolean finished;
 
-    private int edgeId;
+    private VehicleEdgeIterator route;
     private int cellId;
 
     private byte v; // velocity
     private float slowProb;
     private byte maxVelocity = 5;
-
-    private List<EdgeIteratorState> edgeList;
-    private int edgeIndex;
 
     private CellsGraph cg;
 
@@ -57,7 +59,8 @@ public class Vehicle {
 
     private void finish(String error)
     {
-        logger.error(error);
+        if (error != null)
+            logger.error(error);
         finished = true;
     }
 
@@ -85,9 +88,8 @@ public class Vehicle {
             return;
         }
 
-        edgeList = paths.get(0).calcEdges();
-        // start from 1 to avoid the 'fake' edge added by the query graph
-        edgeIndex = 1;
+        Path p = paths.get(0);
+        List<EdgeIteratorState> edgeList = p.calcEdges();
 
         if (edgeList.size() <= 1)
         {
@@ -95,45 +97,48 @@ public class Vehicle {
             return;
         }
 
-        EdgeIteratorState e = edgeList.get(edgeIndex);
-        int maxId = edgeList.stream().mapToInt(EdgeIteratorState::getEdge).max().getAsInt();
-        int minId = edgeList.stream().mapToInt(EdgeIteratorState::getEdge).min().getAsInt();
-        edgeId = e.getEdge();
-        logger.debug("edge id: " + edgeId);
-        logger.debug("max edge id: " + maxId);
-        logger.debug("min edge id: " + minId);
+        route = new VehicleEdgeIterator(edgeList);
+        route.next();
 
-        cg.set(edgeId, cellId, true);
+        cg.set(route, cellId, true);
 
         finished = false;
     }
 
-    private int freeCells = -1;
     public void accelerationStep()
     {
-        assert !isFinished();
+        if (v >= maxVelocity)
+            return;
+        CellIterator c = new CellIterator(new VehicleEdgeIterator(route), cg, cellId);
+        int freeCells = 0;
+        while (!c.next() && freeCells < v + 1)
+            freeCells++;
 
-        freeCells = cg.freeCellsAhead(edgeId, cellId);
-        if (freeCells > v+1 && v < maxVelocity)
+        if (freeCells == v + 1)
         {
             logger.debug("Accelerating");
             v++;
         }
+
     }
 
     public void slowStep()
     {
-        if (freeCells < v)
+        int j = 0;
+        CellIterator c = new CellIterator(new VehicleEdgeIterator(route), cg, cellId);
+
+        while (!c.next() && j <= v)
+            j++;
+
+        if (j <= v)
         {
             logger.debug("Slowing");
-            v = (byte) (freeCells);
+            v = (byte) j;
         }
     }
 
     public void randomStep()
     {
-        int c = cg.getCellCount(edgeId);
-        logger.debug(id + "freecells:"+freeCells + "V:"+v + "count:"+ c);
         if (v > 0 && Math.random() < slowProb)
         {
             logger.debug("Randomly slowing");
@@ -143,18 +148,24 @@ public class Vehicle {
 
     public void moveStep()
     {
-        logger.debug("Moving from " + cellId + " to " + (cellId + v));
-        cg.set(edgeId, cellId, false);
-        cellId += v;
-        cg.set(edgeId, cellId, true);
+        logger.debug("Moving from " + cellId + " to " + (cellId + v) + " (unless it's going over the edge)");
+        cg.set(route, cellId, false);
+        CellIterator c = new CellIterator(route, cg, cellId);
+        int steps = v;
+        while (steps > 0)
+        {
+            c.next();
+            steps--;
+        }
+        cellId = c.getCellIndex();
+        cg.set(route, cellId, true);
     }
 
     public void updateLocation()
     {
-        double progress = (cellId+1)/ (float) (cg.getCellCount(edgeId));
-        EdgeIteratorState edge = edgeList.get(edgeIndex);
+        double progress = (cellId + 1) / (float) (cg.getCellCount(route));
 
-        PointList path = edge.fetchWayGeometry(3);
+        PointList path = route.fetchWayGeometry(3);
         if (path.isEmpty())
         {
             logger.debug("Path is empty, not moving...");
@@ -170,20 +181,16 @@ public class Vehicle {
         double currDist = 0;
         logger.debug(String.format("start(%d): %f + %f", id, currDist, distTravelled));
         int i = 0;
-        while (i < path.getSize()-1 && currDist <= distTravelled)
+        while (i < path.getSize() - 1 && currDist <= distTravelled)
         {
             double nextDist = dc.calcDist(path.getLat(i), path.getLon(i), path.getLat(i + 1), path.getLon(i + 1));
-            logger.debug(String.format("-%d|%d: %f + %f", id,i,currDist,nextDist));
+            logger.debug(String.format("-%d|%d: %f + %f", id, i, currDist, nextDist));
             if (currDist + nextDist > distTravelled)
             {
-                double partProgress = (distTravelled - currDist)/nextDist;
+                double partProgress = (distTravelled - currDist) / nextDist;
                 double newLat = path.getLat(i) + partProgress * (path.getLat(i + 1) - path.getLat(i));
                 double newLon = path.getLon(i) + partProgress * (path.getLon(i + 1) - path.getLon(i));
                 loc.set(newLat, newLon);
-                if (currDist + nextDist > dist)
-                {
-                    nextEdge();
-                }
                 return;
             }
             currDist += nextDist;
@@ -192,20 +199,6 @@ public class Vehicle {
 
         // if we get here we've reached the end of the edge
         loc.set(path.getLat(path.getSize() - 1), path.getLon(path.getSize() - 1));
-        nextEdge();
-    }
-
-    private void nextEdge()
-    {
-        edgeIndex++;
-        if (edgeIndex >= edgeList.size() - 1)
-        {
-            logger.info("Vehicle " + id + " has reached destination");
-            finished = true;
-            return;
-        }
-        edgeId = edgeList.get(edgeIndex).getEdge();
-        cellId = 0;
     }
 
     @Override

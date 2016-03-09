@@ -3,8 +3,6 @@ package com.graphhopper.marmoset;
 import com.graphhopper.GraphHopper;
 import com.graphhopper.marmoset.util.CellsGraph;
 import com.graphhopper.marmoset.util.Location;
-import com.graphhopper.routing.util.EncodingManager;
-import com.graphhopper.routing.util.FlagEncoder;
 import com.graphhopper.util.CmdArgs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,23 +48,7 @@ public class MarmosetHopper {
 
         double cellSize = args.getDouble("marmoset.cellsize", 10.0);
         cellsGraph = new CellsGraph(hopper.getGraphHopperStorage().getBaseGraph(), cellSize);
-        cellsGraph.init(getFlagEncoder());
-    }
-
-    public FlagEncoder getFlagEncoder()
-    {
-        EncodingManager em = hopper.getEncodingManager();
-        List<FlagEncoder> encoders = em.fetchEdgeEncoders();
-        if (encoders.size() <= 0)
-        {
-            logger.error("No flag encoders found!");
-            return null;
-        }
-
-        if (encoders.size() > 1)
-            logger.warn("Multiple encoders found - using the first (" + encoders.get(0).toString() + ")");
-
-        return encoders.get(0);
+        cellsGraph.init();
     }
 
     private Random latRan = new Random(123);

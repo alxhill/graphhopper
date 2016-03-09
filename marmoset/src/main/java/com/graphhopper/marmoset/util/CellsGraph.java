@@ -3,6 +3,8 @@ package com.graphhopper.marmoset.util;
 import com.graphhopper.routing.util.AllEdgesIterator;
 import com.graphhopper.routing.util.FlagEncoder;
 import com.graphhopper.storage.Graph;
+import com.graphhopper.util.EdgeIterator;
+import com.graphhopper.util.EdgeIteratorState;
 
 /**
  * Created by alexander on 01/03/2016.
@@ -16,10 +18,9 @@ public class CellsGraph {
     public CellsGraph(Graph graph, double cellSize) {
         this.cellSize = cellSize;
         this.graph = graph;
-
     }
 
-    public void init(FlagEncoder fe)
+    public void init()
     {
         AllEdgesIterator iterator = graph.getAllEdges();
         cells = new boolean[iterator.getMaxId()][];
@@ -28,45 +29,53 @@ public class CellsGraph {
         {
             int cellCount = Math.max(1, (int) (iterator.getDistance() / cellSize));
 
-            if (fe.isForward(iterator.getFlags()))
-                cells[iterator.getEdge()] = new boolean[cellCount];
-
-            if (fe.isBackward(iterator.getFlags()))
-                reverseCells[iterator.getEdge()] = new boolean[cellCount];
+            cells[iterator.getEdge()] = new boolean[cellCount];
+            reverseCells[iterator.getEdge()] = new boolean[cellCount];
         }
     }
 
-    public int getCellCount(int edgeId)
+    public int getCellCount(EdgeIteratorState edge)
     {
-        if (edgeId >= cells.length)
+        int edgeId = edge.getEdge();
+        boolean[][] currCells = getCells(edge);
+        if (edgeId >= currCells.length)
             throw new ArrayIndexOutOfBoundsException(
-                    String.format("EdgeId '%d' out of bounds (max %d)", edgeId, cells.length));
-        return cells[edgeId].length;
+                    String.format("EdgeId '%d' out of bounds (max %d)", edgeId, currCells.length));
+        return currCells[edgeId].length;
     }
 
-    public int freeCellsAhead(int edgeId, int cellId)
+    public void set(EdgeIteratorState edge, int cellId, boolean hasVehicle)
     {
-        int move = 1;
-        while (cellId + move < cells[edgeId].length)
-        {
-            if (!cells[edgeId][cellId + move])
-                move++;
-            else
-                return move-1;
-        }
+        boolean[][] currCells = getCells(edge);
+        int edgeId = edge.getEdge();
+        if (edgeId >= currCells.length)
+            throw new ArrayIndexOutOfBoundsException(
+                    String.format("EdgeId '%d' out of bounds (max %d)", edgeId, currCells.length));
+        if (cellId >= currCells[edgeId].length)
+            throw new ArrayIndexOutOfBoundsException(
+                    String.format("CellId '%d' out of bounds (max %d) for edge %d", cellId, currCells[edgeId].length, edgeId));
 
-        return move-1;
+        currCells[edgeId][cellId] = hasVehicle;
     }
 
-    public void set(int edgeId, int cellId, boolean hasVehicle)
+    public boolean get(EdgeIteratorState edge, int cellId)
     {
-        if (edgeId >= cells.length)
+        boolean[][] currCells = getCells(edge);
+        int edgeId = edge.getEdge();
+        if (edgeId >= currCells.length)
             throw new ArrayIndexOutOfBoundsException(
-                    String.format("EdgeId '%d' out of bounds (max %d)", edgeId, cells.length));
-        if (cellId >= cells[edgeId].length)
+                    String.format("EdgeId '%d' out of bounds (max %d)", edgeId, currCells.length));
+        if (cellId >= currCells[edgeId].length)
             throw new ArrayIndexOutOfBoundsException(
-                    String.format("CellId '%d' out of bounds (max %d) for edge %d", cellId, cells[edgeId].length, edgeId));
+                    String.format("CellId '%d' out of bounds (max %d) for edge %d", cellId, currCells[edgeId].length, edgeId));
+        return currCells[edgeId][cellId];
+    }
 
-        cells[edgeId][cellId] = hasVehicle;
+    private boolean[][] getCells(EdgeIteratorState edge)
+    {
+        if (edge.getBaseNode() < edge.getAdjNode())
+            return cells;
+
+        return reverseCells;
     }
 }
