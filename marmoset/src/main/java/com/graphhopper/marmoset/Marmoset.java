@@ -92,7 +92,7 @@ public class Marmoset {
 
     public static void addVehicles(int count)
     {
-        System.out.println("Adding " + count + " vehicles");
+        System.out.println("Adding " + count + " vehicles (" + (count + mh.getVehicleCount()) + ")");
         IntStream.range(0, count).forEach(i -> mh.addVehicle());
     }
 

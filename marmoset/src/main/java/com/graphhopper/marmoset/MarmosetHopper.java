@@ -124,4 +124,8 @@ public class MarmosetHopper {
         return isPaused;
     }
 
+    public int getVehicleCount()
+    {
+        return vehicles.size();
+    }
 }

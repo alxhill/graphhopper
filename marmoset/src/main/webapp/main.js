@@ -3,8 +3,8 @@
  */
 function initMap() {
     window.carIcon = L.icon({
-        iconUrl: 'car-icon.png',
-        iconSize: [20,15]
+        iconUrl: 'car-icon-opt.png',
+        iconSize: [20,8]
     });
 
     window.map = L.map('map').setView([51.505, -0.09], 13);
@@ -101,6 +101,22 @@ var carSet = {
     }
 };
 
+L.AngleMarker = L.Marker.extend({
+    options: {
+        angle: 0
+    },
+
+    _setPos: function (pos) {
+        L.Marker.prototype._setPos.call(this, pos);
+        if (this.options.angle) {
+            this._icon.style[L.DomUtil.TRANSFORM] += ' rotate(' + this.options.angle + 'deg)';
+        }
+    }
+});
+L.angleMarker = function(latlngs, options) {
+    return new L.AngleMarker(latlngs, options);;
+}
+
 var Car = function(id, vel, lat, lon) {
     this.id = id;
     this.vel = vel;
@@ -111,27 +127,23 @@ var Car = function(id, vel, lat, lon) {
 Car.prototype = {
 
     moveTo: function(lat, lon, vel) {
-        var line = [this.pos, [lat, lon]];
-
         this.vel = vel;
-        this.pos = [lat, lon];
 
         if (this.marker == null) {
-            this.marker = L.animatedMarker(line, {
+            this.marker = L.angleMarker([lat,lon], {
                 icon: carIcon,
-                distance: 1,
-                interval: 1000,
-                clickable: true
-            }).on("click", function () {
-                this.labelVisible = !this.labelVisible;
-            }.bind(this));
+                angle: 180
+            });
             window.map.addLayer(this.marker);
         } else {
-            this.marker.stop();
-            this.marker.setLine(line);
+            //this.marker.stop();
+            //this.marker.setLine(line);
+            this.marker.setLatLng([lat, lon]);
         }
         this.marker.bindLabel(""+this.id + "|" + this.vel, {noHide: false});
-        this.marker.start();
+        this.marker.options.angle = angleFromCoordinate(this.pos[0], this.pos[1], lat, lon);
+        this.pos = [lat, lon];
+        //this.marker.start();
     },
 
     remove: function() {
