@@ -12,9 +12,20 @@
                 height: 100%;
                 width: 100%;
                 position: absolute;
+                font-family:sans-serif;
             }
             #map {
                 height: 90%;
+            }
+            #info {
+                position:absolute;
+                top:0;
+                right:0;
+            }
+            #info p {
+                margin: 0;
+                padding: 0;
+                font-size:0.5em;
             }
         </style>
     </head>
@@ -29,6 +40,7 @@
             <br><br>
             <input type="button" name="addVehicles" id="addVehicle" value="Add Vehicles">
         </div>
+        <div id="info"></div>
         <br>
         <div id="map"></div>
 

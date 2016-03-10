@@ -42,6 +42,7 @@ function initAll() {
 
 var carSet = {
     _cars: [],
+    _carCount: 0,
 
     // start listening to the websocket and setup the callbacks
     init: function(count) {
@@ -55,6 +56,7 @@ var carSet = {
                 c.remove();
             });
             this._cars = [];
+            this._carCount = 0;
         }
 
         this.ws = new WebSocket("ws://localhost:8888");
@@ -82,21 +84,25 @@ var carSet = {
 
     // deals with the set of data that comes from the websocket
     processData: function(data) {
-        if (!data instanceof ArrayBuffer) {
-            return;
-        }
         var view = new DataView(data);
+        var totalVel = 0;
         for (var i = 0; i < data.byteLength; i += 24) {
             var index = view.getInt32(i);
             var vel = view.getInt32(i + 4);
             var lat = view.getFloat64(i + 8);
             var lon = view.getFloat64(i + 16);
+            totalVel += vel;
             if (this._cars[index]) {
                 this._cars[index].moveTo(lat, lon, vel);
             } else {
+                this._carCount++;
                 this._cars[index] = new Car(index, vel, lat, lon);
             }
         }
+        var liveVehicles = data.byteLength / 24;
+        document.getElementById("info").innerHTML =
+            "<p>Vehicles:" + liveVehicles + " (" + (this._carCount-liveVehicles)+"/"+this._carCount+")</p>" +
+            "<p>Mean velocity: "+ Math.round(1000 * totalVel / liveVehicles) / 1000 +"</p>";
     }
 };
 
