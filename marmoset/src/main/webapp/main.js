@@ -7,12 +7,12 @@ function initMap() {
         iconSize: [20,8]
     });
 
-    window.map = L.map('map').setView([51.505, -0.09], 13);
+    window.map = L.map('map', {zoomAnimation:false}).setView([51.505, -0.09], 13);
     L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
         attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
         maxZoom: 18,
         id: 'alxhill.p69lilm1',
-        accessToken: 'pk.eyJ1IjoiYWx4aGlsbCIsImEiOiJjaWtyMnM5cTAwMDFzd2RrcWxjdW14dGlhIn0._vGArimDzlTVhET5T_GZzA'
+        accessToken: 'pk.eyJ1IjoiYWx4aGlsbCIsImEiOiJjaWtyMnM5cTAwMDFzd2RrcWxjdW14dGlhIn0._vGArimDzlTVhET5T_GZzA',
     }).addTo(window.map);
 }
 
@@ -39,7 +39,6 @@ function initAll() {
     initMap();
     initButtons(carSet);
 }
-
 
 var carSet = {
     _cars: [],
@@ -114,8 +113,8 @@ L.AngleMarker = L.Marker.extend({
     }
 });
 L.angleMarker = function(latlngs, options) {
-    return new L.AngleMarker(latlngs, options);;
-}
+    return new L.AngleMarker(latlngs, options);
+};
 
 var Car = function(id, vel, lat, lon) {
     this.id = id;
@@ -141,7 +140,8 @@ Car.prototype = {
             this.marker.setLatLng([lat, lon]);
         }
         this.marker.bindLabel(""+this.id + "|" + this.vel, {noHide: false});
-        this.marker.options.angle = angleFromCoordinate(this.pos[0], this.pos[1], lat, lon);
+        if (this.pos[0] != lat && this.pos[1] != lon)
+            this.marker.options.angle = angleFromCoordinate(this.pos[0], this.pos[1], lat, lon);
         this.pos = [lat, lon];
         //this.marker.start();
     },
