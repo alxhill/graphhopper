@@ -1,23 +1,28 @@
 package com.graphhopper.marmoset.util;
 
 import com.graphhopper.routing.util.AllEdgesIterator;
-import com.graphhopper.routing.util.FlagEncoder;
 import com.graphhopper.storage.Graph;
-import com.graphhopper.util.EdgeIterator;
 import com.graphhopper.util.EdgeIteratorState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by alexander on 01/03/2016.
  */
-public class CellsGraph {
-    private final double cellSize;
+public class CellGraph {
+
+    public final float cellSize;
     private Graph graph;
     private boolean[][] cells;
     private boolean[][] reverseCells;
 
-    public CellsGraph(Graph graph, double cellSize) {
+    private static final Logger logger = LoggerFactory.getLogger(CellGraph.class);
+
+    public CellGraph(Graph graph, float cellSize) {
         this.cellSize = cellSize;
         this.graph = graph;
+        logger.info("slowest speed: " + 1 * cellSize * 3.6 * 0.62 + "mph");
+        logger.info("fastest speed: " + 5 * cellSize * 3.6 * 0.62 + "mph");
     }
 
     public void init()

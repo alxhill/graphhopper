@@ -1,7 +1,7 @@
 package com.graphhopper.marmoset;
 
 import com.graphhopper.GraphHopper;
-import com.graphhopper.marmoset.util.CellsGraph;
+import com.graphhopper.marmoset.util.CellGraph;
 import com.graphhopper.marmoset.util.Location;
 import com.graphhopper.util.CmdArgs;
 import org.slf4j.Logger;
@@ -19,7 +19,7 @@ import java.util.stream.IntStream;
 public class MarmosetHopper {
 
     private GraphHopper hopper;
-    private CellsGraph cellsGraph;
+    private CellGraph cellGraph;
     private List<Vehicle> vehicles;
 
     private static Logger logger = LoggerFactory.getLogger(MarmosetHopper.class);
@@ -50,9 +50,9 @@ public class MarmosetHopper {
         hopper.init(args);
         hopper.importOrLoad();
 
-        double cellSize = args.getDouble("marmoset.cellsize", 10.0);
-        cellsGraph = new CellsGraph(hopper.getGraphHopperStorage().getBaseGraph(), cellSize);
-        cellsGraph.init();
+        float cellSize = (float) args.getDouble("marmoset.cellsize", 10.0);
+        cellGraph = new CellGraph(hopper.getGraphHopperStorage().getBaseGraph(), cellSize);
+        cellGraph.init();
     }
 
     public synchronized void addVehicle()
@@ -103,9 +103,9 @@ public class MarmosetHopper {
         return hopper;
     }
 
-    public CellsGraph getCellsGraph()
+    public CellGraph getCellGraph()
     {
-        return cellsGraph;
+        return cellGraph;
     }
 
     public void pause()

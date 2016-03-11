@@ -4,9 +4,10 @@ import com.graphhopper.GHRequest;
 import com.graphhopper.GHResponse;
 import com.graphhopper.GraphHopper;
 import com.graphhopper.marmoset.util.CellIterator;
-import com.graphhopper.marmoset.util.CellsGraph;
+import com.graphhopper.marmoset.util.CellGraph;
 import com.graphhopper.marmoset.util.Location;
 import com.graphhopper.routing.Path;
+import com.graphhopper.routing.util.FlagEncoder;
 import com.graphhopper.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,12 +35,12 @@ public class Vehicle {
     private VehicleEdgeIterator route;
     private int cellId;
 
-    private byte v; // velocity
+    private int v; // velocity
     private float slowProb;
     private Random slowRand;
-    private byte maxVelocity = 5;
+    private int maxVelocity = 5;
 
-    private CellsGraph cg;
+    private CellGraph cg;
 
     public Vehicle(MarmosetHopper hopper, Location start, Location dest)
     {
@@ -74,7 +75,7 @@ public class Vehicle {
         cellId = 0; // TODO: figure out which cell the vehicle should start at
         v = 0;
 
-        cg = hopper.getCellsGraph();
+        cg = hopper.getCellGraph();
 
         GraphHopper gh = hopper.getGraphHopper();
 
@@ -102,7 +103,8 @@ public class Vehicle {
             return;
         }
 
-        route = new VehicleEdgeIterator(edgeList);
+        FlagEncoder carEncoder = gh.getEncodingManager().getEncoder("car");
+        route = new VehicleEdgeIterator(edgeList, carEncoder);
         route.next();
 
         cg.set(route, cellId, true);
@@ -112,12 +114,23 @@ public class Vehicle {
 
     public void accelerationStep()
     {
-        if (v >= maxVelocity)
-            return;
         CellIterator c = new CellIterator(new VehicleEdgeIterator(route), cg, cellId);
+
+        int newMaxVel = maxVelocity;
+
         int freeCells = 0;
         while (!c.next() && freeCells < v + 1)
+        {
+            newMaxVel = Math.min(newMaxVel, c.getCellSpeed());
             freeCells++;
+        }
+        // because who actually drives at the speed limit?
+        maxVelocity = Math.max(2, newMaxVel);
+
+        if (v >= maxVelocity) {
+            v = maxVelocity;
+            return;
+        }
 
         if (freeCells == v + 1)
         {

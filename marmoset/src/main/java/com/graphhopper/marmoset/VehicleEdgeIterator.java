@@ -15,9 +15,11 @@ public class VehicleEdgeIterator implements EdgeIterator {
     private List<EdgeIteratorState> edges;
     private EdgeIteratorState edge;
     private int index;
+    private FlagEncoder encoder;
 
-    public VehicleEdgeIterator(List<EdgeIteratorState> edges)
+    public VehicleEdgeIterator(List<EdgeIteratorState> edges, FlagEncoder encoder)
     {
+        this.encoder = encoder;
         // starts at 0 to skip first edge, as the first edge is virtual (i.e not in graph)
         index = 0;
         this.edges = edges;
@@ -25,9 +27,15 @@ public class VehicleEdgeIterator implements EdgeIterator {
 
     public VehicleEdgeIterator(VehicleEdgeIterator e)
     {
+        encoder = e.encoder;
         edges = e.edges;
         edge = e.edge;
         index = e.index;
+    }
+
+    public double getRoadSpeed()
+    {
+        return encoder.getSpeed(edge.getFlags());
     }
 
     public boolean hasNext()

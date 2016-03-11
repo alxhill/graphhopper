@@ -1,6 +1,8 @@
 package com.graphhopper.marmoset.util;
 
 import com.graphhopper.marmoset.VehicleEdgeIterator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by alexander on 09/03/2016.
@@ -8,13 +10,14 @@ import com.graphhopper.marmoset.VehicleEdgeIterator;
 public class CellIterator {
 
     private VehicleEdgeIterator route;
-    private CellsGraph cg;
+    private CellGraph cg;
     private int cellIndex;
+    private static final Logger logger = LoggerFactory.getLogger(CellIterator.class);
 
-    public CellIterator(VehicleEdgeIterator route, CellsGraph cellsGraph, int cellId)
+    public CellIterator(VehicleEdgeIterator route, CellGraph cellGraph, int cellId)
     {
         this.route = route;
-        this.cg = cellsGraph;
+        this.cg = cellGraph;
         this.cellIndex = cellId;
     }
 
@@ -40,5 +43,14 @@ public class CellIterator {
     public int getCellIndex()
     {
         return cellIndex;
+    }
+
+    public int getCellSpeed()
+    {
+        double roadSpeed = route.getRoadSpeed();
+        double v = (roadSpeed / (cg.cellSize * 3.6));
+        int max = Math.max(1, (int) Math.ceil(v));
+//        logger.info("CS:" + max + "(" + Math.round(v * 100) / 100.0 + ")=" + Math.round(10 * max * cg.cellSize * 3.6 * 0.62) / 10.0 + "mph, actual=" + roadSpeed * 0.62 + " on " + route.getName());
+        return max;
     }
 }
