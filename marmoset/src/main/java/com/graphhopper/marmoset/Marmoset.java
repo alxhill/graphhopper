@@ -25,7 +25,8 @@ public class Marmoset {
     private static int iteration;
 
 
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) throws IOException, InterruptedException
+    {
         mh = new MarmosetHopper();
         mh.init();
 
@@ -33,7 +34,8 @@ public class Marmoset {
         startWebSocketServer();
 
         System.out.println("Press enter to terminate");
-        try {
+        try
+        {
             System.in.read();
         } catch (Throwable ignored) {}
 
@@ -41,13 +43,16 @@ public class Marmoset {
         fileServer.stop();
     }
 
-    public static void start(int initialVehicles) {
-        if (!isRunning) {
+    public static void start(int initialVehicles)
+    {
+        if (!isRunning)
+        {
             isRunning = true;
             iteration = 0;
             mh.startSimulation(initialVehicles);
-            nextTimestep();
-        } else if (mh.paused()) {
+        }
+        else if (mh.paused())
+        {
             mh.unpause();
         }
     }

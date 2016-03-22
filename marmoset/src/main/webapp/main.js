@@ -71,6 +71,7 @@ var carSet = {
         }.bind(this);
         this.ws.onopen = function (e) {
             this.ws.send("start|" + count);
+            this.ws.send("next");
         }.bind(this);
     },
 
