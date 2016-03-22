@@ -69,7 +69,7 @@ public class MarmosetSocketServer extends WebSocketServer {
         if (s.matches("start\\|\\d+"))
         {
             String num = s.split("\\|")[1];
-            Marmoset.run(Integer.valueOf(num, 10));
+            Marmoset.start(Integer.valueOf(num, 10));
         }
         else if (s.matches("addVehicles\\|\\d+"))
         {
@@ -79,6 +79,10 @@ public class MarmosetSocketServer extends WebSocketServer {
         else if (s.equals("pause"))
         {
             Marmoset.pause();
+        }
+        else if (s.equals("next"))
+        {
+            Marmoset.nextTimestep();
         }
     }
 

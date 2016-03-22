@@ -69,7 +69,6 @@ public class MarmosetHopper {
     {
         logger.info("Starting simulation with " + initialVehicles + " vehicles");
         IntStream.range(0, initialVehicles).forEach(v -> addVehicle());
-        vehicles = vehicles.stream().filter(v -> !v.isFinished()).collect(Collectors.toList());
     }
 
     public synchronized void timestep()

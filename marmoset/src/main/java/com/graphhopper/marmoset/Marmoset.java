@@ -1,8 +1,6 @@
 package com.graphhopper.marmoset;
-
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.SimpleWebServer;
-import fi.iki.elonen.util.ServerRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,10 +21,11 @@ public class Marmoset {
     private static boolean isRunning = false;
 
     private static Logger logger = LoggerFactory.getLogger(Marmoset.class);
-    private static Thread marmosetThread;
 
-    public static void main(String[] args) throws IOException, InterruptedException
-    {
+    private static int iteration;
+
+
+    public static void main(String[] args) throws IOException, InterruptedException {
         mh = new MarmosetHopper();
         mh.init();
 
@@ -36,51 +35,19 @@ public class Marmoset {
         System.out.println("Press enter to terminate");
         try {
             System.in.read();
-        }
-        catch (Throwable ignored) {}
+        } catch (Throwable ignored) {}
 
         mss.stop();
         fileServer.stop();
-        if (marmosetThread != null)
-        {
-            marmosetThread.interrupt();
-        }
     }
 
-    public static void run(int initialVehicles)
-    {
-        if (!isRunning)
-        {
+    public static void start(int initialVehicles) {
+        if (!isRunning) {
             isRunning = true;
-            Runnable task = () -> {
-                int i = 0;
-                mh.startSimulation(initialVehicles);
-                while (!Thread.interrupted())
-                {
-                    if (!mh.paused())
-                    {
-                        logger.info("===ITERATION [" + i + "]===");
-                        i++;
-                        mh.timestep();
-                        ByteBuffer data = mh.getVehicleBytes();
-                        mss.distributeData(data);
-                    }
-                    try
-                    {
-                        Thread.sleep(1000);
-                    }
-                    catch (InterruptedException e)
-                    {
-                        return;
-                    }
-                }
-            };
-
-            marmosetThread = new Thread(task);
-            marmosetThread.start();
-        }
-        else if (mh.paused())
-        {
+            iteration = 0;
+            mh.startSimulation(initialVehicles);
+            nextTimestep();
+        } else if (mh.paused()) {
             mh.unpause();
         }
     }
@@ -92,7 +59,7 @@ public class Marmoset {
 
     public static void addVehicles(int count)
     {
-        System.out.println("Adding " + count + " vehicles (" + (count + mh.getVehicleCount()) + ")");
+        logger.info("Adding " + count + " vehicles (" + (count + mh.getVehicleCount()) + ")");
         IntStream.range(0, count).forEach(i -> mh.addVehicle());
     }
 
@@ -102,7 +69,7 @@ public class Marmoset {
 
         mss = new MarmosetSocketServer(new InetSocketAddress(port));
         mss.start();
-        System.out.println("Listening for websocket requests.");
+        logger.info("Listening for websocket requests.");
     }
 
     private static void startFileServer()
@@ -112,11 +79,19 @@ public class Marmoset {
         try
         {
             fileServer.start(5000, false);
-            System.out.println("File server started");
+            logger.info("File server started");
         }
         catch (IOException e)
         {
-            System.err.println("Failed to start server: " + e);
+            logger.info("Failed to start server: " + e);
         }
+    }
+
+    public static void nextTimestep() {
+        logger.info("===ITERATION [" + iteration + "]===");
+        iteration++;
+        mh.timestep();
+        ByteBuffer data = mh.getVehicleBytes();
+        mss.distributeData(data);
     }
 }

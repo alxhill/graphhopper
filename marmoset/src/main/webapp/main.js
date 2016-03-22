@@ -63,6 +63,11 @@ var carSet = {
         this.ws.binaryType = "arraybuffer";
         this.ws.onmessage = function (e) {
             this.processData(e.data);
+            window.setTimeout(function () {
+                // send the 'next' command to tell the server that it's ready to
+                // received more data from the back end
+                this.ws.send("next");
+            }.bind(this));
         }.bind(this);
         this.ws.onopen = function (e) {
             this.ws.send("start|" + count);
@@ -137,7 +142,7 @@ Car.prototype = {
         if (this.marker == null) {
             this.marker = L.angleMarker([lat,lon], {
                 icon: carIcon,
-                angle: 180
+                angle: 180*Math.random()
             });
             window.map.addLayer(this.marker);
         } else {
