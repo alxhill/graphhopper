@@ -100,6 +100,7 @@ var carSet = {
             totalVel += vel;
             if (this._cars[index]) {
                 this._cars[index].moveTo(lat, lon, vel);
+                this._cars[index].moved = true;
             } else {
                 this._carCount++;
                 this._cars[index] = new Car(index, vel, lat, lon);

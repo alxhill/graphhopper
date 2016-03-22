@@ -3,6 +3,7 @@ package com.graphhopper.marmoset;
 import com.graphhopper.GraphHopper;
 import com.graphhopper.marmoset.util.CellGraph;
 import com.graphhopper.marmoset.util.Location;
+import com.graphhopper.marmoset.vehicle.Vehicle;
 import com.graphhopper.util.CmdArgs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

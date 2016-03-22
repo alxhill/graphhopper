@@ -1,4 +1,4 @@
-package com.graphhopper.marmoset;
+package com.graphhopper.marmoset.vehicle;
 
 import com.graphhopper.routing.util.FlagEncoder;
 import com.graphhopper.util.EdgeIterator;
@@ -10,14 +10,14 @@ import java.util.List;
 /**
  * Created by alexander on 09/03/2016.
  */
-public class VehicleEdgeIterator implements EdgeIterator {
+public class DijkstraVehicleIterator implements VehicleIterator {
 
     private List<EdgeIteratorState> edges;
     private EdgeIteratorState edge;
     private int index;
     private FlagEncoder encoder;
 
-    public VehicleEdgeIterator(List<EdgeIteratorState> edges, FlagEncoder encoder)
+    public DijkstraVehicleIterator(List<EdgeIteratorState> edges, FlagEncoder encoder)
     {
         this.encoder = encoder;
         // starts at 0 to skip first edge, as the first edge is virtual (i.e not in graph)
@@ -25,7 +25,7 @@ public class VehicleEdgeIterator implements EdgeIterator {
         this.edges = edges;
     }
 
-    public VehicleEdgeIterator(VehicleEdgeIterator e)
+    public DijkstraVehicleIterator(DijkstraVehicleIterator e)
     {
         encoder = e.encoder;
         edges = e.edges;
@@ -33,11 +33,13 @@ public class VehicleEdgeIterator implements EdgeIterator {
         index = e.index;
     }
 
+    @Override
     public double getRoadSpeed()
     {
         return encoder.getSpeed(edge.getFlags());
     }
 
+    @Override
     public boolean hasNext()
     {
         return index < edges.size() - 1;

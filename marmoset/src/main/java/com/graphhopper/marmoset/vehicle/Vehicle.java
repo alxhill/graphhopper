@@ -1,8 +1,9 @@
-package com.graphhopper.marmoset;
+package com.graphhopper.marmoset.vehicle;
 
 import com.graphhopper.GHRequest;
 import com.graphhopper.GHResponse;
 import com.graphhopper.GraphHopper;
+import com.graphhopper.marmoset.MarmosetHopper;
 import com.graphhopper.marmoset.util.CellIterator;
 import com.graphhopper.marmoset.util.CellGraph;
 import com.graphhopper.marmoset.util.Location;
@@ -22,25 +23,25 @@ import java.util.stream.Collectors;
  */
 public class Vehicle {
 
-    private static final Logger logger = LoggerFactory.getLogger(Vehicle.class);
+    protected static final Logger logger = LoggerFactory.getLogger(Vehicle.class);
 
-    private static int maxId = 0;
-    private final int id;
+    protected static int maxId = 0;
+    protected final int id;
 
-    private MarmosetHopper hopper;
-    private Location loc;
-    private Location dest;
-    private boolean finished;
+    protected MarmosetHopper hopper;
+    protected Location loc;
+    protected Location dest;
+    protected boolean finished;
 
-    private VehicleEdgeIterator route;
-    private int cellId;
+    protected DijkstraVehicleIterator route;
 
-    private int v; // velocity
-    private float slowProb;
-    private Random slowRand;
-    private int maxVelocity = 5;
+    protected int cellId;
+    protected int v; // velocity
+    protected float slowProb;
+    protected Random slowRand;
+    protected int maxVelocity = 5;
 
-    private CellGraph cg;
+    protected CellGraph cg;
 
     public Vehicle(MarmosetHopper hopper, Location start, Location dest)
     {
@@ -104,7 +105,7 @@ public class Vehicle {
         }
 
         FlagEncoder carEncoder = gh.getEncodingManager().getEncoder("car");
-        route = new VehicleEdgeIterator(edgeList, carEncoder);
+        route = new DijkstraVehicleIterator(edgeList, carEncoder);
         route.next();
 
         cg.set(route, cellId, true);
@@ -114,7 +115,7 @@ public class Vehicle {
 
     public void accelerationStep()
     {
-        CellIterator c = new CellIterator(new VehicleEdgeIterator(route), cg, cellId);
+        CellIterator c = new CellIterator(new DijkstraVehicleIterator(route), cg, cellId);
 
         int newMaxVel = maxVelocity;
 
@@ -143,7 +144,7 @@ public class Vehicle {
     public void slowStep()
     {
         int j = 0;
-        CellIterator c = new CellIterator(new VehicleEdgeIterator(route), cg, cellId);
+        CellIterator c = new CellIterator(new DijkstraVehicleIterator(route), cg, cellId);
 
         while (!c.next() && j <= v)
             j++;

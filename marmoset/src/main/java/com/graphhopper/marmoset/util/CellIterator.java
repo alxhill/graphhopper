@@ -1,6 +1,6 @@
 package com.graphhopper.marmoset.util;
 
-import com.graphhopper.marmoset.VehicleEdgeIterator;
+import com.graphhopper.marmoset.vehicle.DijkstraVehicleIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,12 +9,12 @@ import org.slf4j.LoggerFactory;
  */
 public class CellIterator {
 
-    private VehicleEdgeIterator route;
+    private DijkstraVehicleIterator route;
     private CellGraph cg;
     private int cellIndex;
     private static final Logger logger = LoggerFactory.getLogger(CellIterator.class);
 
-    public CellIterator(VehicleEdgeIterator route, CellGraph cellGraph, int cellId)
+    public CellIterator(DijkstraVehicleIterator route, CellGraph cellGraph, int cellId)
     {
         this.route = route;
         this.cg = cellGraph;
