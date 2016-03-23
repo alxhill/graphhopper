@@ -28,7 +28,7 @@ public class RandomVehicle extends BaseVehicle {
 
         FlagEncoder carEncoder = gh.getEncodingManager().getEncoder("car");
 
+
         return new RandomVehicleIterator(qr.getClosestEdge(), carEncoder, gh.getGraphHopperStorage());
     }
-
 }

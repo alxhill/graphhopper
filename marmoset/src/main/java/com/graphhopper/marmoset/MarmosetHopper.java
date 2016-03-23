@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -27,6 +28,9 @@ public class MarmosetHopper {
     protected List<Vehicle> vehicles;
 
     protected boolean isPaused;
+
+    protected Random rand = new Random(999);
+    protected double randPercent;
 
     private static Logger logger = LoggerFactory.getLogger(MarmosetHopper.class);
 
@@ -57,15 +61,18 @@ public class MarmosetHopper {
         float cellSize = (float) args.getDouble("marmoset.cellsize", 10.0);
         cellGraph = new CellGraph(hopper.getGraphHopperStorage().getBaseGraph(), cellSize);
         cellGraph.init();
+
+        randPercent = args.getDouble("marmoset.randpercent", 0.2);
+        assert randPercent >= 0 && randPercent <= 1;
     }
 
     public synchronized void addVehicle()
     {
         Vehicle v;
-        if (Math.random() < 0.2)
-            v = new DijkstraVehicle(this, Location.randLondon(), Location.randCentralLondon());
-        else
+        if (rand.nextDouble() < randPercent)
             v = new RandomVehicle(this, Location.randLondon(), Location.randCentralLondon());
+        else
+            v = new DijkstraVehicle(this, Location.randLondon(), Location.randCentralLondon());
         v.init();
         if (v.isFinished())
             addVehicle();

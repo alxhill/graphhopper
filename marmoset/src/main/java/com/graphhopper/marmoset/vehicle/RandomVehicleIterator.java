@@ -1,6 +1,5 @@
 package com.graphhopper.marmoset.vehicle;
 
-import com.graphhopper.routing.util.DefaultEdgeFilter;
 import com.graphhopper.routing.util.FlagEncoder;
 import com.graphhopper.storage.Graph;
 import com.graphhopper.util.EdgeExplorer;
@@ -23,7 +22,7 @@ public class RandomVehicleIterator extends BaseVehicleIterator {
     {
         super(encoder);
         this.graph = graph;
-        edgeExplorer = graph.createEdgeExplorer(new DefaultEdgeFilter(encoder, false, true));
+        this.edgeExplorer = graph.createEdgeExplorer();
         edge = firstEdge;
     }
 
