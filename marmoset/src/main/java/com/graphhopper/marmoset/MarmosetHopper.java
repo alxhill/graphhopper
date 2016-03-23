@@ -4,6 +4,7 @@ import com.graphhopper.GraphHopper;
 import com.graphhopper.marmoset.util.CellGraph;
 import com.graphhopper.marmoset.util.Location;
 import com.graphhopper.marmoset.vehicle.DijkstraVehicle;
+import com.graphhopper.marmoset.vehicle.RandomVehicle;
 import com.graphhopper.marmoset.vehicle.Vehicle;
 import com.graphhopper.util.CmdArgs;
 import org.slf4j.Logger;
@@ -11,7 +12,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -59,7 +61,11 @@ public class MarmosetHopper {
 
     public synchronized void addVehicle()
     {
-        Vehicle v = new DijkstraVehicle(this, Location.randLondon(), Location.randCentralLondon());
+        Vehicle v;
+        if (Math.random() < 0.2)
+            v = new DijkstraVehicle(this, Location.randLondon(), Location.randCentralLondon());
+        else
+            v = new RandomVehicle(this, Location.randLondon(), Location.randCentralLondon());
         v.init();
         if (v.isFinished())
             addVehicle();

@@ -36,14 +36,23 @@ public class RandomVehicleIterator extends BaseVehicleIterator {
     @Override
     public boolean next()
     {
-        EdgeIterator it = edgeExplorer.setBaseNode(edge.getBaseNode());
+        EdgeIterator it = edgeExplorer.setBaseNode(edge.getAdjNode());
         int i = 0;
         while (it.next())
+            i++;
+
+        int travelId = (int) (i * Math.random());
+
+        it = edgeExplorer.setBaseNode(edge.getBaseNode());
+        while (travelId >= 0)
         {
-            logger.info("random vehicle edge number " + i);
+            travelId--;
+            it.next();
         }
 
-        return false;
+        edge = it;
+
+        return true;
     }
 
     @Override

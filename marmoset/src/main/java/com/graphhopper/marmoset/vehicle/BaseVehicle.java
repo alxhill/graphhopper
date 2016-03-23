@@ -1,10 +1,12 @@
 package com.graphhopper.marmoset.vehicle;
 
 import com.graphhopper.marmoset.MarmosetHopper;
-import com.graphhopper.marmoset.util.CellIterator;
 import com.graphhopper.marmoset.util.CellGraph;
+import com.graphhopper.marmoset.util.CellIterator;
 import com.graphhopper.marmoset.util.Location;
-import com.graphhopper.util.*;
+import com.graphhopper.util.DistanceCalc;
+import com.graphhopper.util.DistanceCalc2D;
+import com.graphhopper.util.PointList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

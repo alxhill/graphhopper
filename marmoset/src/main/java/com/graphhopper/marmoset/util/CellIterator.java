@@ -1,6 +1,5 @@
 package com.graphhopper.marmoset.util;
 
-import com.graphhopper.marmoset.vehicle.DijkstraVehicleIterator;
 import com.graphhopper.marmoset.vehicle.VehicleIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -32,7 +32,7 @@ public class DijkstraVehicle extends BaseVehicle {
         List<Path> paths = gh.calcPaths(ghRequest, ghResponse);
         if (ghResponse.hasErrors())
         {
-            finish("Routing failed:" + ghResponse.getErrors().stream().map(Throwable::toString).collect(Collectors.joining("\n")));
+            finish("Routing failed (id "+id+"):" + ghResponse.getErrors().stream().map(Throwable::toString).collect(Collectors.joining("\n")));
             return null;
         }
 
@@ -54,4 +54,5 @@ public class DijkstraVehicle extends BaseVehicle {
         FlagEncoder carEncoder = gh.getEncodingManager().getEncoder("car");
         return new DijkstraVehicleIterator(edgeList, carEncoder);
     }
+
 }
