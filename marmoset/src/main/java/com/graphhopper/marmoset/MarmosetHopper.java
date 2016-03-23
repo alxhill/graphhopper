@@ -3,6 +3,7 @@ package com.graphhopper.marmoset;
 import com.graphhopper.GraphHopper;
 import com.graphhopper.marmoset.util.CellGraph;
 import com.graphhopper.marmoset.util.Location;
+import com.graphhopper.marmoset.vehicle.DijkstraVehicle;
 import com.graphhopper.marmoset.vehicle.Vehicle;
 import com.graphhopper.util.CmdArgs;
 import org.slf4j.Logger;
@@ -19,13 +20,13 @@ import java.util.stream.IntStream;
  */
 public class MarmosetHopper {
 
-    private GraphHopper hopper;
-    private CellGraph cellGraph;
-    private List<Vehicle> vehicles;
+    protected GraphHopper hopper;
+    protected CellGraph cellGraph;
+    protected List<Vehicle> vehicles;
+
+    protected boolean isPaused;
 
     private static Logger logger = LoggerFactory.getLogger(MarmosetHopper.class);
-
-    private boolean isPaused;
 
     public MarmosetHopper() {
         hopper = new GraphHopper();
@@ -58,7 +59,7 @@ public class MarmosetHopper {
 
     public synchronized void addVehicle()
     {
-        Vehicle v = new Vehicle(this, Location.randLondon(), Location.randCentralLondon());
+        Vehicle v = new DijkstraVehicle(this, Location.randLondon(), Location.randCentralLondon());
         v.init();
         if (v.isFinished())
             addVehicle();

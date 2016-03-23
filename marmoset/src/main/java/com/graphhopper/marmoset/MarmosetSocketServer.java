@@ -89,6 +89,7 @@ public class MarmosetSocketServer extends WebSocketServer {
     @Override
     public void onError(WebSocket webSocket, Exception e)
     {
+        e.printStackTrace();
         if (webSocket != null)
             sockets.remove(webSocket);
     }

@@ -74,7 +74,7 @@ public class Marmoset {
 
         mss = new MarmosetSocketServer(new InetSocketAddress(port));
         mss.start();
-        logger.info("Listening for websocket requests.");
+        System.out.println("Listening for websocket requests.");
     }
 
     private static void startFileServer()
@@ -84,11 +84,11 @@ public class Marmoset {
         try
         {
             fileServer.start(5000, false);
-            logger.info("File server started");
+            System.out.println("File server started");
         }
         catch (IOException e)
         {
-            logger.info("Failed to start server: " + e);
+            logger.error("Failed to start server: " + e);
         }
     }
 
