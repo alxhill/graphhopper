@@ -67,6 +67,11 @@ public abstract class BaseVehicle implements Vehicle {
         finished = true;
     }
 
+    protected void finish()
+    {
+        finish(null);
+    }
+
     @Override
     public void init()
     {
@@ -159,7 +164,7 @@ public abstract class BaseVehicle implements Vehicle {
 
         if (!route.hasNext() && cellId == cg.getCellCount(route) - 1)
         {
-            finished = true;
+            finish();
             logger.info("BaseVehicle " + id + " reached destination");
         }
     }

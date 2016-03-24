@@ -40,8 +40,7 @@ public class Marmoset {
             System.in.read();
         } catch (Throwable ignored) {}
 
-        mss.stop();
-        fileServer.stop();
+        System.exit(0);
     }
 
     public static void start(int initialVehicles)
