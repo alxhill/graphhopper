@@ -18,7 +18,7 @@ import java.util.Random;
  */
 public abstract class BaseVehicle implements Vehicle {
 
-    protected static final Logger logger = LoggerFactory.getLogger(BaseVehicle.class);
+    private static final Logger logger = LoggerFactory.getLogger(BaseVehicle.class);
 
     protected static int maxId = 0;
     protected final int id;
@@ -36,6 +36,8 @@ public abstract class BaseVehicle implements Vehicle {
     protected Random slowRand;
     protected int maxVelocity = 5;
 
+    protected boolean didSlow;
+
     protected CellGraph cg;
 
     public BaseVehicle(MarmosetHopper hopper, Location start, Location dest)
@@ -48,6 +50,26 @@ public abstract class BaseVehicle implements Vehicle {
         finished = false;
         slowProb = 0.4f;
         slowRand = new Random(id);
+        didSlow = false;
+    }
+
+    @Override
+    public boolean didSlow()
+    {
+        return didSlow;
+    }
+
+    @Override
+    public int getVelocity()
+    {
+        return v;
+    }
+
+    @Override
+    public int getMaxVelocity()
+    {
+        CellIterator c = new CellIterator(route, cg, cellId);
+        return c.getCellSpeed();
     }
 
     @Override
@@ -90,11 +112,14 @@ public abstract class BaseVehicle implements Vehicle {
         cg.set(route, cellId, true);
 
         finished = false;
+        didSlow = false;
     }
 
     @Override
     public void accelerationStep()
     {
+        didSlow = false;
+
         CellIterator c = new CellIterator(route.duplicate(), cg, cellId);
 
         int newMaxVel = maxVelocity;
@@ -133,6 +158,7 @@ public abstract class BaseVehicle implements Vehicle {
         if (j <= v)
         {
             logger.debug("Slowing");
+            didSlow = true;
             v = (byte) j;
         }
     }

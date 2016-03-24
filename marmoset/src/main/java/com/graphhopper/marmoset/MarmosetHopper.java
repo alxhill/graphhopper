@@ -97,6 +97,13 @@ public class MarmosetHopper {
         vehicles.stream().forEach(Vehicle::updateLocation);
 
         vehicles = vehicles.stream().filter(v -> !v.isFinished()).collect(Collectors.toList());
+
+        int slowed = vehicles.stream().mapToInt(v -> v.didSlow() ? 1 : 0).reduce(0, (acc, i) -> acc + i);
+        double averageVelocity = vehicles.stream().mapToDouble(Vehicle::getVelocity).average().getAsDouble();
+        long deltaV = vehicles.stream().filter(v -> v.getMaxVelocity() <= v.getVelocity()).count();
+        logger.info(String.format("%d/%d (%.2f%%) of vehicles slowed, moving at %.2fc/s with %d not at max",
+                slowed, vehicles.size(), (float) slowed * 100.0/ vehicles.size(),
+                averageVelocity, deltaV));
     }
 
     public synchronized String getVehicleString()

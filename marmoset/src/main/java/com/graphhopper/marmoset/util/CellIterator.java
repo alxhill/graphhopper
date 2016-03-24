@@ -50,7 +50,6 @@ public class CellIterator {
         double roadSpeed = route.getRoadSpeed();
         double v = (roadSpeed / (cg.cellSize * 3.6));
         int max = Math.max(1, (int) Math.ceil(v));
-//        logger.info("CS:" + max + "(" + Math.round(v * 100) / 100.0 + ")=" + Math.round(10 * max * cg.cellSize * 3.6 * 0.62) / 10.0 + "mph, actual=" + roadSpeed * 0.62 + " on " + route.getName());
         return max;
     }
 }

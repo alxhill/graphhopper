@@ -19,4 +19,9 @@ public interface Vehicle {
     void addToBuffer(ByteBuffer byteBuffer);
 
     boolean isFinished();
+
+    // metric related stuff
+    boolean didSlow();
+    int getVelocity();
+    int getMaxVelocity();
 }
