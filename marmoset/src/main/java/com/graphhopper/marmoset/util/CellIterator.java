@@ -49,7 +49,6 @@ public class CellIterator {
     {
         double roadSpeed = route.getRoadSpeed();
         double v = (roadSpeed / (cg.cellSize * 3.6));
-        int max = Math.max(1, (int) Math.ceil(v));
-        return max;
+        return Math.max(1, (int) Math.ceil(v));
     }
 }

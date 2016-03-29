@@ -86,10 +86,11 @@ public class MarmosetHopper {
         IntStream.range(0, initialVehicles).forEach(v -> addVehicle());
     }
 
-    public synchronized void timestep()
+    public synchronized boolean timestep()
     {
-        if (isPaused)
-            return;
+        if (isPaused || vehicles.size() == 0)
+            return false;
+
         vehicles.stream().forEach(Vehicle::accelerationStep);
         vehicles.stream().forEach(Vehicle::slowStep);
         vehicles.stream().forEach(Vehicle::randomStep);
@@ -98,12 +99,22 @@ public class MarmosetHopper {
 
         vehicles = vehicles.stream().filter(v -> !v.isFinished()).collect(Collectors.toList());
 
+        return true;
+    }
+
+    public synchronized String getMetrics()
+    {
+        if (vehicles.size() == 0)
+            return null;
+
         int slowed = vehicles.stream().mapToInt(v -> v.didSlow() ? 1 : 0).reduce(0, (acc, i) -> acc + i);
         double averageVelocity = vehicles.stream().mapToDouble(Vehicle::getVelocity).average().getAsDouble();
         long deltaV = vehicles.stream().filter(v -> v.getMaxVelocity() <= v.getVelocity()).count();
-        logger.info(String.format("%d/%d (%.2f%%) of vehicles slowed, moving at %.2fc/s with %d not at max",
+
+        return String.format("%d/%d (%.2f%%) of vehicles slowed, moving at %.2fc/s with %d not at max",
                 slowed, vehicles.size(), (float) slowed * 100.0/ vehicles.size(),
                 averageVelocity, deltaV));
+
     }
 
     public synchronized String getVehicleString()

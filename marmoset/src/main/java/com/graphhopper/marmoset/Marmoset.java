@@ -93,10 +93,19 @@ public class Marmoset {
     }
 
     public static void nextTimestep() {
-        logger.info("===ITERATION [" + iteration + "]===");
-        iteration++;
-        mh.timestep();
-        ByteBuffer data = mh.getVehicleBytes();
-        mss.distributeData(data);
+        if (mh.timestep())
+        {
+            logger.info("===ITERATION [" + iteration + "]===");
+            mh.getMetrics();
+            iteration++;
+            ByteBuffer data = mh.getVehicleBytes();
+            mss.distributeData(data);
+        }
+        else
+        {
+            logger.info("Timestep failed, not iterating");
+        }
     }
+
+    public
 }
