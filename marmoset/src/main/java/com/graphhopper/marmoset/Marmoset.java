@@ -5,11 +5,9 @@ import fi.iki.elonen.SimpleWebServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.stream.IntStream;
 
 /**
@@ -37,9 +35,9 @@ public class Marmoset {
             startFileServer();
             startWebSocketServer();
         }
-        else
+        else if (args[0].equals("--file"))
         {
-
+            startFileSimulation(args[1], Integer.parseInt(args[2]));
         }
 
         System.out.println("Press enter to terminate");
@@ -49,6 +47,24 @@ public class Marmoset {
         } catch (Throwable ignored) {}
 
         System.exit(0);
+    }
+
+    private static void startFileSimulation(String outfile, int initialVehicles) throws IOException
+    {
+        PrintWriter p = new PrintWriter("simulations/" + outfile, "UTF-8");
+        start(initialVehicles);
+        while (mh.getVehicleCount() > 0)
+        {
+            if (mh.timestep()) {
+                logger.info("===ITERATION [" + iteration + "]===");
+                if (iteration % 10 == 0)
+                    logger.info(mh.getVehicleCount() + " vehicles remaining");
+                String metrics = mh.getMetrics();
+                p.println(metrics);
+                iteration++;
+            }
+        }
+        p.close();
     }
 
     public static void start(int initialVehicles)
