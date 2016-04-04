@@ -106,6 +106,4 @@ public class Marmoset {
             logger.info("Timestep failed, not iterating");
         }
     }
-
-    public
 }

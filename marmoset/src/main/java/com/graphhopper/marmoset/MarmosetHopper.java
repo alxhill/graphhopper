@@ -112,8 +112,8 @@ public class MarmosetHopper {
         long deltaV = vehicles.stream().filter(v -> v.getMaxVelocity() <= v.getVelocity()).count();
 
         return String.format("%d/%d (%.2f%%) of vehicles slowed, moving at %.2fc/s with %d not at max",
-                slowed, vehicles.size(), (float) slowed * 100.0/ vehicles.size(),
-                averageVelocity, deltaV));
+                slowed, vehicles.size(), (float) slowed * 100.0 / vehicles.size(),
+                averageVelocity, deltaV);
 
     }
 
