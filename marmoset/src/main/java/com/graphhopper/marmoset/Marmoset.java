@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.stream.IntStream;
 
 /**
@@ -31,8 +32,15 @@ public class Marmoset {
         mh = new MarmosetHopper();
         mh.init();
 
-        startFileServer();
-        startWebSocketServer();
+        if (args.length == 0 || args[0].equals("--web"))
+        {
+            startFileServer();
+            startWebSocketServer();
+        }
+        else
+        {
+
+        }
 
         System.out.println("Press enter to terminate");
         try

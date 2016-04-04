@@ -26,7 +26,8 @@ elif [ "$ACTION" = "build" ]; then
 elif [ "$ACTION" = "rebuild" ]; then
     ${MAVEN} --projects marmoset,core -DskipTests=true install assembly:single
 elif [ "$ACTION" = "run" ]; then
-    ${JAVA} -ea -cp marmoset/target/marmoset-0.7-SNAPSHOT-with-dep.jar com.graphhopper.marmoset.Marmoset
+    shift
+    ${JAVA} -ea -cp marmoset/target/marmoset-0.7-SNAPSHOT-with-dep.jar com.graphhopper.marmoset.Marmoset $@
 elif [ "$ACTION" = "test" ]; then
     ${MAVEN} test
 elif [ "$ACTION" = "lines" ]; then
