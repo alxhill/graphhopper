@@ -28,6 +28,7 @@ elif [ "$ACTION" = "rebuild" ]; then
 elif [ "$ACTION" = "run" ]; then
     shift
     ${JAVA} -ea -cp marmoset/target/marmoset-0.7-SNAPSHOT-with-dep.jar com.graphhopper.marmoset.Marmoset $@
+    exit $?
 elif [ "$ACTION" = "test" ]; then
     ${MAVEN} test
 elif [ "$ACTION" = "lines" ]; then

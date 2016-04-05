@@ -5,7 +5,9 @@ import fi.iki.elonen.SimpleWebServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.stream.IntStream;
@@ -37,7 +39,9 @@ public class Marmoset {
         }
         else if (args[0].equals("--file"))
         {
-            startFileSimulation(args[1], Integer.parseInt(args[2]));
+            runOfflineSimulation(args[1], Integer.parseInt(args[2]));
+            logger.info("Simulation complete.");
+            return;
         }
 
         System.out.println("Press enter to terminate");
@@ -49,20 +53,21 @@ public class Marmoset {
         System.exit(0);
     }
 
-    private static void startFileSimulation(String outfile, int initialVehicles) throws IOException
+    private static void runOfflineSimulation(String outfile, int initialVehicles) throws IOException
     {
         PrintWriter p = new PrintWriter("simulations/" + outfile, "UTF-8");
+        p.println(MarmosetHopper.Metrics.getHeader());
         start(initialVehicles);
-        while (mh.getVehicleCount() > 0)
+        while (mh.getVehicleCount() > 0 && mh.timestep())
         {
-            if (mh.timestep()) {
-                logger.info("===ITERATION [" + iteration + "]===");
-                if (iteration % 10 == 0)
-                    logger.info(mh.getVehicleCount() + " vehicles remaining");
-                String metrics = mh.getMetrics();
-                p.println(metrics);
-                iteration++;
-            }
+            logger.info("===ITERATION [" + iteration + "] VEHICLES [" + mh.getVehicleCount() + "]===");
+            MarmosetHopper.Metrics metrics = mh.getMetrics();
+            if (metrics == null)
+                continue;
+            logger.info(metrics.getDescription());
+            p.println(metrics.toString());
+            p.flush();
+            iteration++;
         }
         p.close();
     }

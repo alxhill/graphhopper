@@ -102,19 +102,16 @@ public class MarmosetHopper {
         return true;
     }
 
-    public synchronized String getMetrics()
+    public synchronized Metrics getMetrics()
     {
         if (vehicles.size() == 0)
             return null;
 
         int slowed = vehicles.stream().mapToInt(v -> v.didSlow() ? 1 : 0).reduce(0, (acc, i) -> acc + i);
-        double averageVelocity = vehicles.stream().mapToDouble(Vehicle::getVelocity).average().getAsDouble();
-        long deltaV = vehicles.stream().filter(v -> v.getMaxVelocity() <= v.getVelocity()).count();
+        double averageCells = vehicles.stream().mapToDouble(Vehicle::getVelocity).average().getAsDouble();
+        long notAtMax = vehicles.stream().filter(v -> v.getMaxVelocity() <= v.getVelocity()).count();
 
-        return String.format("%d/%d (%.2f%%) of vehicles slowed, moving at %.2fc/s with %d not at max",
-                slowed, vehicles.size(), (float) slowed * 100.0 / vehicles.size(),
-                averageVelocity, deltaV);
-
+        return new Metrics(slowed, averageCells, notAtMax, vehicles.size());
     }
 
     public synchronized String getVehicleString()
@@ -159,5 +156,38 @@ public class MarmosetHopper {
     public int getVehicleCount()
     {
         return vehicles.size();
+    }
+
+    public static class Metrics {
+        public int slowed;
+        public double averageCells;
+        public long notAtMax;
+        public int vehicleCount;
+
+        public Metrics(int slowed, double averageCells, long notAtMax, int vehicleCount)
+        {
+            this.slowed = slowed;
+            this.averageCells = averageCells;
+            this.notAtMax = notAtMax;
+            this.vehicleCount = vehicleCount;
+        }
+
+        public static String getHeader()
+        {
+            return "VehicleCount,VehiclesSlowed,AverageCellSpeed,NotAtMax";
+        }
+
+        @Override
+        public String toString()
+        {
+            return String.format("%d,%d,%f,%d", vehicleCount, slowed, averageCells, notAtMax);
+        }
+
+        public String getDescription()
+        {
+            return String.format("%d/%d (%.2f%%) of vehicles slowed, moving at %.2fc/s with %d not at max",
+                    slowed, vehicleCount, (float) slowed * 100.0 / vehicleCount,
+                    averageCells, notAtMax);
+        }
     }
 }
