@@ -86,7 +86,12 @@ public class MarmosetHopper {
         IntStream.range(0, initialVehicles).forEach(v -> addVehicle());
     }
 
-    public synchronized boolean timestep()
+    public boolean timestep()
+    {
+        return timestep(true);
+    }
+
+    public synchronized boolean timestep(boolean webMode)
     {
         if (isPaused || vehicles.size() == 0)
             return false;
@@ -95,7 +100,8 @@ public class MarmosetHopper {
         vehicles.stream().forEach(Vehicle::slowStep);
         vehicles.stream().forEach(Vehicle::randomStep);
         vehicles.stream().forEach(Vehicle::moveStep);
-        vehicles.stream().forEach(Vehicle::updateLocation);
+        if (webMode)
+            vehicles.stream().forEach(Vehicle::updateLocation);
 
         vehicles = vehicles.stream().filter(v -> !v.isFinished()).collect(Collectors.toList());
 

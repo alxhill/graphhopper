@@ -58,7 +58,7 @@ public class Marmoset {
         PrintWriter p = new PrintWriter("simulations/" + outfile, "UTF-8");
         p.println(MarmosetHopper.Metrics.getHeader());
         start(initialVehicles);
-        while (mh.getVehicleCount() > 0 && mh.timestep())
+        while (mh.getVehicleCount() > 0 && mh.timestep(false))
         {
             logger.info("===ITERATION [" + iteration + "] VEHICLES [" + mh.getVehicleCount() + "]===");
             MarmosetHopper.Metrics metrics = mh.getMetrics();
