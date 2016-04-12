@@ -1,7 +1,13 @@
 /**
  * Created by alexander on 22/02/2016.
  */
+
 function initMap() {
+
+    window.canvas = document.getElementById("canvas");
+    window.ctx = canvas.getContext("2d");
+    window.icon = document.getElementById("icon");
+
     window.carIcon = L.icon({
         iconUrl: 'car-icon-opt.png',
         iconSize: [20,8]
@@ -14,6 +20,29 @@ function initMap() {
         id: 'alxhill.p69lilm1',
         accessToken: 'pk.eyJ1IjoiYWx4aGlsbCIsImEiOiJjaWtyMnM5cTAwMDFzd2RrcWxjdW14dGlhIn0._vGArimDzlTVhET5T_GZzA',
     }).addTo(window.map);
+
+    resizeCanvas(window.map.getSize());
+    window.map.on('moveend', function() {
+        console.log('panning');
+        resizeCanvas(window.map.getSize());
+        //ctx.clearRect(0, 0, canvas.width, canvas.height);
+        window.map.fireEvent('viewreset', {hard: true});
+        //window.map.setView(window.map.getCenter(), window.map.getZoom(), true);
+
+    });
+
+    window.addEventListener('resize', function(){
+        console.log("resize");
+    })
+
+}
+
+function resizeCanvas(size)
+{
+    if (size.x != window.canvas.width)
+        window.canvas.width = size.x;
+    if (size.y != window.canvas.height)
+        window.canvas.height = size.y;
 }
 
 function initButtons(carSet) {
@@ -39,6 +68,7 @@ function initAll() {
     initMap();
     initButtons(carSet);
 }
+
 
 var carSet = {
     _cars: [],
@@ -90,6 +120,7 @@ var carSet = {
 
     // deals with the set of data that comes from the websocket
     processData: function(data) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         var view = new DataView(data);
         var totalVel = 0;
         for (var i = 0; i < data.byteLength; i += 24) {
@@ -119,10 +150,13 @@ L.AngleMarker = L.Marker.extend({
     },
 
     _setPos: function (pos) {
-        L.Marker.prototype._setPos.call(this, pos);
+        //L.Marker.prototype._setPos.call(this, pos);
+        ctx.translate(pos.x, pos.y);
         if (this.options.angle) {
-            this._icon.style[L.DomUtil.TRANSFORM] += ' rotate(' + this.options.angle + 'deg)';
+            ctx.rotate(this.options.angle);
         }
+        ctx.drawImage(icon, -icon.offsetWidth/2, -icon.offsetHeight/2);
+        ctx.setTransform(1,0,0,1,0,0);
     }
 });
 L.angleMarker = function(latlngs, options) {
@@ -142,9 +176,12 @@ Car.prototype = {
         this.vel = vel;
 
         if (this.marker == null) {
-            this.marker = L.angleMarker([lat,lon], {
-                icon: carIcon,
-                angle: 180*Math.random()
+            this.marker = L.circleMarker([lat,lon], {
+                stroke: false,
+                radius: 4,
+                opacity: 0.8
+                //icon: carIcon,
+                //angle: 180*Math.random()
             });
             window.map.addLayer(this.marker);
         } else {

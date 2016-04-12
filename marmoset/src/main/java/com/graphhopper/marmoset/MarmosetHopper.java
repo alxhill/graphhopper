@@ -115,7 +115,7 @@ public class MarmosetHopper {
 
         int slowed = vehicles.stream().mapToInt(v -> v.didSlow() ? 1 : 0).reduce(0, (acc, i) -> acc + i);
         double averageCells = vehicles.stream().mapToDouble(Vehicle::getVelocity).average().getAsDouble();
-        long notAtMax = vehicles.stream().filter(v -> v.getMaxVelocity() <= v.getVelocity()).count();
+        long notAtMax = vehicles.stream().filter(v -> v.getVelocity() < v.getMaxVelocity()).count();
 
         return new Metrics(slowed, averageCells, notAtMax, vehicles.size());
     }

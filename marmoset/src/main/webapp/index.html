@@ -17,6 +17,11 @@
             #map {
                 height: 90%;
             }
+            #canvas {
+                position: absolute;
+                z-index: 10;
+                pointer-events: none;
+            }
             #info {
                 position:absolute;
                 top:0;
@@ -42,8 +47,10 @@
         </div>
         <div id="info"></div>
         <br>
+        <canvas id="canvas" width="1400" height="900"></canvas>
         <div id="map"></div>
 
+        <img src="car-icon-opt.png" id="icon"/>
         <script src="main.js"></script>
     </body>
 </html>

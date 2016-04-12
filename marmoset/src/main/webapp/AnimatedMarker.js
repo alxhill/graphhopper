@@ -8,10 +8,7 @@ function angleFromCoordinate(lat1, long1, lat2, long2) {
 
   var brng = Math.atan2(y, x);
 
-  brng = brng * 180/ Math.PI;
-  brng += 270;
-  brng = (brng + 360) % 360;
-
+  brng += 1.5 * Math.PI;
   return brng;
 }
 
