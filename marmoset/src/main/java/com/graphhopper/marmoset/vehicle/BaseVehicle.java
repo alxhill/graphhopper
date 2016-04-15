@@ -102,7 +102,7 @@ public abstract class BaseVehicle implements Vehicle {
 
         cg = hopper.getCellGraph();
 
-        route = getVehicleIterator();
+        route = createVehicleIterator();
 
         if (isFinished())
             return;
@@ -248,5 +248,11 @@ public abstract class BaseVehicle implements Vehicle {
         int pos = b.position();
         b.putInt(id).putInt(v).putDouble(loc.getLat()).putDouble(loc.getLon());
         logger.debug(String.format("[%d]%d|%d|%f|%f", id, b.getInt(pos), b.getInt(pos + 4), b.getDouble(pos + 8), b.getDouble(pos + 16)));
+    }
+
+    @Override
+    public VehicleIterator getVehicleIterator()
+    {
+        return route;
     }
 }

@@ -19,7 +19,7 @@ public class RandomVehicle extends BaseVehicle {
     }
 
     @Override
-    public VehicleIterator getVehicleIterator()
+    public VehicleIterator createVehicleIterator()
     {
         GraphHopper gh = hopper.getGraphHopper();
         LocationIndex index = gh.getLocationIndex();

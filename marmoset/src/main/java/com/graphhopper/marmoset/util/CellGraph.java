@@ -22,7 +22,7 @@ public class CellGraph {
         this.cellSize = cellSize;
         this.graph = graph;
         logger.info("slowest speed: " + 1 * cellSize * 3.6 * 0.62 + "mph");
-        logger.info("fastest speed: " + 5 * cellSize * 3.6 * 0.62 + "mph");
+        logger.info("fastest speed: " + 7 * cellSize * 3.6 * 0.62 + "mph");
     }
 
     public void init()

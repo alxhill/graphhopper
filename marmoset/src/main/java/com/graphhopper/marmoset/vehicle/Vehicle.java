@@ -7,6 +7,7 @@ import java.nio.ByteBuffer;
  */
 public interface Vehicle {
 
+    VehicleIterator createVehicleIterator();
     VehicleIterator getVehicleIterator();
 
     void init();

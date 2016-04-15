@@ -23,11 +23,11 @@ public class DijkstraVehicle extends BaseVehicle {
     }
 
     @Override
-    public VehicleIterator getVehicleIterator()
+    public VehicleIterator createVehicleIterator()
     {
         GraphHopper gh = hopper.getGraphHopper();
-
         GHRequest ghRequest = new GHRequest(loc.getLat(), loc.getLon(), dest.getLat(), dest.getLon());
+        ghRequest.setWeighting("density");
         GHResponse ghResponse = new GHResponse();
         List<Path> paths = gh.calcPaths(ghRequest, ghResponse);
         if (ghResponse.hasErrors())

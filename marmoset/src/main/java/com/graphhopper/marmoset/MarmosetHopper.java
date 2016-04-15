@@ -6,6 +6,9 @@ import com.graphhopper.marmoset.util.Location;
 import com.graphhopper.marmoset.vehicle.DijkstraVehicle;
 import com.graphhopper.marmoset.vehicle.RandomVehicle;
 import com.graphhopper.marmoset.vehicle.Vehicle;
+import com.graphhopper.routing.util.FlagEncoder;
+import com.graphhopper.routing.util.Weighting;
+import com.graphhopper.routing.util.WeightingMap;
 import com.graphhopper.util.CmdArgs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,10 +35,15 @@ public class MarmosetHopper {
     protected Random rand = new Random(999);
     protected double randPercent;
 
+    protected static final int DENSITY_STEPS = 100;
+    protected static int stepsSinceDensityCalc;
+    protected static DensityMap nextDensityMap;
+    protected static DensityWeighting densityWeighting;
+
     private static Logger logger = LoggerFactory.getLogger(MarmosetHopper.class);
 
     public MarmosetHopper() {
-        hopper = new GraphHopper();
+        hopper = new MarmosetGraphHopper();
         vehicles = new ArrayList<>();
     }
 
@@ -84,6 +92,9 @@ public class MarmosetHopper {
     {
         logger.info("Starting simulation with " + initialVehicles + " vehicles");
         IntStream.range(0, initialVehicles).forEach(v -> addVehicle());
+        System.out.println("Made " + vehicles.size() + " vehicles");
+        nextDensityMap = new DensityMap(hopper.getGraphHopperStorage(), vehicles);
+        stepsSinceDensityCalc = 0;
     }
 
     public boolean timestep()
@@ -93,9 +104,22 @@ public class MarmosetHopper {
 
     public synchronized boolean timestep(boolean webMode)
     {
-        long startTimestep = System.nanoTime();
         if (isPaused || vehicles.size() == 0)
             return false;
+
+        long startTimestep = System.nanoTime();
+
+        if (stepsSinceDensityCalc == DENSITY_STEPS)
+        {
+            logger.info("Creating new density map");
+            densityWeighting.setDensityMap(nextDensityMap);
+            nextDensityMap = new DensityMap(hopper.getGraphHopperStorage(), vehicles);
+            // reset vehicles so they use the new weighting
+            vehicles.parallelStream().forEach(Vehicle::init);
+            stepsSinceDensityCalc = 0;
+        }
+        else
+            stepsSinceDensityCalc++;
 
         vehicles.parallelStream().forEach(Vehicle::accelerationStep);
         vehicles.parallelStream().forEach(Vehicle::slowStep);
@@ -196,6 +220,22 @@ public class MarmosetHopper {
             return String.format("%d/%d (%.2f%%) of vehicles slowed, moving at %.2fc/s with %d not at max",
                     slowed, vehicleCount, (float) slowed * 100.0 / vehicleCount,
                     averageCells, notAtMax);
+        }
+    }
+
+    private static class MarmosetGraphHopper extends GraphHopper {
+        @Override
+        public Weighting createWeighting(WeightingMap wMap, FlagEncoder encoder)
+        {
+            if (wMap.getWeighting().equalsIgnoreCase("density"))
+            {
+                densityWeighting = new DensityWeighting(encoder, wMap);
+                return densityWeighting;
+            }
+            else
+            {
+                return super.createWeighting(wMap, encoder);
+            }
         }
     }
 }

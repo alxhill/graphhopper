@@ -186,8 +186,8 @@ Car.prototype = {
         if (this.marker == null) {
             this.marker = L.circleMarker([lat,lon], {
                 stroke: false,
-                radius: 5,
-                fillOpacity: 0.8,
+                radius: 4,
+                fillOpacity: 0.5,
                 color: "#ff6600"
                 //icon: carIcon,
                 //angle: 180*Math.random()
