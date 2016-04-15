@@ -21,24 +21,18 @@ function initMap() {
         accessToken: 'pk.eyJ1IjoiYWx4aGlsbCIsImEiOiJjaWtyMnM5cTAwMDFzd2RrcWxjdW14dGlhIn0._vGArimDzlTVhET5T_GZzA',
     }).addTo(window.map);
 
-    resizeCanvas(window.map.getSize());
-    window.map.on('moveend', function() {
-        console.log('panning');
-        resizeCanvas(window.map.getSize());
-        //ctx.clearRect(0, 0, canvas.width, canvas.height);
-        window.map.fireEvent('viewreset', {hard: true});
-        //window.map.setView(window.map.getCenter(), window.map.getZoom(), true);
-
-    });
-
-    window.addEventListener('resize', function(){
-        console.log("resize");
-    })
+    //resizeCanvas(window.map.getSize());
+    //window.map.on('moveend', function() {
+    //    //resizeCanvas(window.map.getSize());
+    //});
+    //
+    //window.addEventListener('resize', function(){
+    //    //console.log("resize");
+    //})
 
 }
 
-function resizeCanvas(size)
-{
+function resizeCanvas(size) {
     if (size.x != window.canvas.width)
         window.canvas.width = size.x;
     if (size.y != window.canvas.height)
