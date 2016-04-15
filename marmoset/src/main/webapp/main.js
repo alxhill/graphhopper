@@ -2,6 +2,20 @@
  * Created by alexander on 22/02/2016.
  */
 
+function angleFromCoordinate(lat1, long1, lat2, long2) {
+
+    var dLon = (long2 - long1);
+
+    var y = Math.sin(dLon) * Math.cos(lat2);
+    var x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1)
+        * Math.cos(lat2) * Math.cos(dLon);
+
+    var brng = Math.atan2(y, x);
+
+    brng += 1.5 * Math.PI;
+    return brng;
+}
+
 function initMap() {
 
     window.canvas = document.getElementById("canvas");
@@ -172,8 +186,9 @@ Car.prototype = {
         if (this.marker == null) {
             this.marker = L.circleMarker([lat,lon], {
                 stroke: false,
-                radius: 4,
-                opacity: 0.8
+                radius: 5,
+                fillOpacity: 0.8,
+                color: "#ff6600"
                 //icon: carIcon,
                 //angle: 180*Math.random()
             });

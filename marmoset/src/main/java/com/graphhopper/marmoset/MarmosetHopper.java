@@ -93,18 +93,20 @@ public class MarmosetHopper {
 
     public synchronized boolean timestep(boolean webMode)
     {
+        long startTimestep = System.nanoTime();
         if (isPaused || vehicles.size() == 0)
             return false;
 
-        vehicles.stream().forEach(Vehicle::accelerationStep);
-        vehicles.stream().forEach(Vehicle::slowStep);
-        vehicles.stream().forEach(Vehicle::randomStep);
-        vehicles.stream().forEach(Vehicle::moveStep);
+        vehicles.parallelStream().forEach(Vehicle::accelerationStep);
+        vehicles.parallelStream().forEach(Vehicle::slowStep);
+        vehicles.parallelStream().forEach(Vehicle::randomStep);
+        vehicles.parallelStream().forEach(Vehicle::moveStep);
         if (webMode)
             vehicles.stream().forEach(Vehicle::updateLocation);
 
-        vehicles = vehicles.stream().filter(v -> !v.isFinished()).collect(Collectors.toList());
+        vehicles = vehicles.parallelStream().filter(v -> !v.isFinished()).collect(Collectors.toList());
 
+        logger.info("Timestep took " + (System.nanoTime() - startTimestep) / 1e6 + "ms");
         return true;
     }
 
@@ -113,9 +115,9 @@ public class MarmosetHopper {
         if (vehicles.size() == 0)
             return null;
 
-        int slowed = vehicles.stream().mapToInt(v -> v.didSlow() ? 1 : 0).reduce(0, (acc, i) -> acc + i);
-        double averageCells = vehicles.stream().mapToDouble(Vehicle::getVelocity).average().getAsDouble();
-        long notAtMax = vehicles.stream().filter(v -> v.getVelocity() < v.getMaxVelocity()).count();
+        int slowed = vehicles.parallelStream().mapToInt(v -> v.didSlow() ? 1 : 0).reduce(0, (acc, i) -> acc + i);
+        double averageCells = vehicles.parallelStream().mapToDouble(Vehicle::getVelocity).average().getAsDouble();
+        long notAtMax = vehicles.parallelStream().filter(v -> v.getVelocity() < v.getMaxVelocity()).count();
 
         return new Metrics(slowed, averageCells, notAtMax, vehicles.size());
     }
