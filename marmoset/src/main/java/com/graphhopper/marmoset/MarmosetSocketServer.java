@@ -87,12 +87,11 @@ public class MarmosetSocketServer extends WebSocketServer {
     }
 
     @Override
-    public void onError(WebSocket webSocket, Exception e)
+    public void onError(WebSocket webSocket, Exception e) throws RuntimeException
     {
-        System.err.println("noo ;(");
         e.printStackTrace();
-        System.err.println(e.getMessage());
-        if (webSocket != null)
-            sockets.remove(webSocket);
+        throw (RuntimeException) e;
+//        if (webSocket != null)
+//            sockets.remove(webSocket);
     }
 }

@@ -28,6 +28,7 @@ public class DijkstraVehicle extends BaseVehicle {
         GraphHopper gh = hopper.getGraphHopper();
         GHRequest ghRequest = new GHRequest(loc.getLat(), loc.getLon(), dest.getLat(), dest.getLon());
         ghRequest.setWeighting("density");
+        ghRequest.setAlgorithm("astarbi");
         GHResponse ghResponse = new GHResponse();
         List<Path> paths = gh.calcPaths(ghRequest, ghResponse);
         if (ghResponse.hasErrors())

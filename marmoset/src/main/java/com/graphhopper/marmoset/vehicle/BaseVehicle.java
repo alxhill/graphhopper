@@ -83,7 +83,7 @@ public abstract class BaseVehicle implements Vehicle {
         if (error != null)
             logger.error(error);
 
-        if (route != null)
+        if (route != null && route.hasNext())
             cg.set(route, cellId, false);
 
         finished = true;
@@ -108,6 +108,11 @@ public abstract class BaseVehicle implements Vehicle {
             return;
 
         route.next();
+        if (!route.hasNext())
+        {
+            finish("Route is empty");
+            return;
+        }
 
         cg.set(route, cellId, true);
 

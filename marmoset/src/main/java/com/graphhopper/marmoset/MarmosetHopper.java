@@ -35,7 +35,7 @@ public class MarmosetHopper {
     protected Random rand = new Random(999);
     protected double randPercent;
 
-    protected static final int DENSITY_STEPS = 100;
+    protected static final int DENSITY_STEPS = 1000;
     protected static int stepsSinceDensityCalc;
     protected static DensityMap nextDensityMap;
     protected static DensityWeighting densityWeighting;
@@ -109,24 +109,24 @@ public class MarmosetHopper {
 
         long startTimestep = System.nanoTime();
 
+        vehicles.parallelStream().forEach(Vehicle::accelerationStep);
+        vehicles.parallelStream().forEach(Vehicle::slowStep);
+        vehicles.parallelStream().forEach(Vehicle::randomStep);
+        vehicles.parallelStream().forEach(Vehicle::moveStep);
+        if (webMode)
+            vehicles.parallelStream().forEach(Vehicle::updateLocation);
+
         if (stepsSinceDensityCalc == DENSITY_STEPS)
         {
             logger.info("Creating new density map");
             densityWeighting.setDensityMap(nextDensityMap);
             nextDensityMap = new DensityMap(hopper.getGraphHopperStorage(), vehicles);
             // reset vehicles so they use the new weighting
-            vehicles.parallelStream().forEach(Vehicle::init);
+            vehicles.stream().filter(v->!v.isFinished()).forEach(Vehicle::init);
             stepsSinceDensityCalc = 0;
         }
         else
             stepsSinceDensityCalc++;
-
-        vehicles.parallelStream().forEach(Vehicle::accelerationStep);
-        vehicles.parallelStream().forEach(Vehicle::slowStep);
-        vehicles.parallelStream().forEach(Vehicle::randomStep);
-        vehicles.parallelStream().forEach(Vehicle::moveStep);
-        if (webMode)
-            vehicles.stream().forEach(Vehicle::updateLocation);
 
         vehicles = vehicles.parallelStream().filter(v -> !v.isFinished()).collect(Collectors.toList());
 
