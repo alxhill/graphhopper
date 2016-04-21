@@ -2,10 +2,14 @@ package com.graphhopper.marmoset;
 
 import com.graphhopper.GraphHopper;
 import com.graphhopper.marmoset.util.CellGraph;
+import com.graphhopper.marmoset.util.ExpectedWeighting;
 import com.graphhopper.marmoset.util.Location;
-import com.graphhopper.marmoset.vehicle.DijkstraVehicle;
 import com.graphhopper.marmoset.vehicle.RandomVehicle;
+import com.graphhopper.marmoset.vehicle.SelfDrivingVehicle;
 import com.graphhopper.marmoset.vehicle.Vehicle;
+import com.graphhopper.routing.util.FlagEncoder;
+import com.graphhopper.routing.util.Weighting;
+import com.graphhopper.routing.util.WeightingMap;
 import com.graphhopper.util.CmdArgs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +27,7 @@ import java.util.stream.IntStream;
  */
 public class MarmosetHopper {
 
-    protected GraphHopper hopper;
+    protected MarmosetGraphHopper hopper;
     protected CellGraph cellGraph;
     protected List<Vehicle> vehicles;
 
@@ -35,7 +39,7 @@ public class MarmosetHopper {
     private static Logger logger = LoggerFactory.getLogger(MarmosetHopper.class);
 
     public MarmosetHopper() {
-        hopper = new GraphHopper();
+        hopper = new MarmosetGraphHopper();
         vehicles = new ArrayList<>();
     }
 
@@ -53,7 +57,7 @@ public class MarmosetHopper {
             return;
         }
 
-        args.put("osmreader.osm", "british-isles-latest.osm.pbf");
+        args.put("osmreader.osm", "london.osm.pbf");
 
         hopper.init(args);
         hopper.importOrLoad();
@@ -72,7 +76,7 @@ public class MarmosetHopper {
         if (rand.nextDouble() < randPercent)
             v = new RandomVehicle(this, Location.randLondon(), Location.randCentralLondon());
         else
-            v = new DijkstraVehicle(this, Location.randLondon(), Location.randCentralLondon());
+            v = new SelfDrivingVehicle(this, Location.randLondon(), Location.randCentralLondon());
         v.init();
         if (v.isFinished())
             addVehicle();
@@ -197,5 +201,27 @@ public class MarmosetHopper {
                     slowed, vehicleCount, (float) slowed * 100.0 / vehicleCount,
                     averageCells, notAtMax);
         }
+    }
+
+    public class MarmosetGraphHopper extends GraphHopper {
+
+        public ExpectedWeighting expectedWeighting;
+
+        @Override
+        public Weighting createWeighting(WeightingMap wMap, FlagEncoder encoder)
+        {
+            if ("expected".equalsIgnoreCase(wMap.getWeighting()))
+            {
+                if (expectedWeighting == null)
+                {
+                    int maxId = this.getGraphHopperStorage().getAllEdges().getMaxId();
+                    expectedWeighting = new ExpectedWeighting(encoder, wMap, vehicles, maxId);
+                }
+
+                return expectedWeighting;
+            }
+            return super.createWeighting(wMap, encoder);
+        }
+
     }
 }
