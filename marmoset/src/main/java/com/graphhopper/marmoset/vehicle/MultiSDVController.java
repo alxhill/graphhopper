@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 /**
  * Created by alexander on 22/04/2016.
@@ -17,7 +18,7 @@ public class MultiSDVController {
     private static final Logger logger = LoggerFactory.getLogger(MultiSDVController.class);
 
     public static final double DAMPING_FACTOR = 0.6;
-    public static final double REROUTE_PROBABILITY = 0.01;
+    public static final double REROUTE_PROBABILITY = 0.001;
     public static final int EXPMAP_UPDATE_FREQUENCY = 100;
 
     protected List<SelfDrivingVehicle> vehicles;
@@ -29,19 +30,21 @@ public class MultiSDVController {
     {
         this.expectedWeighting = expectedWeighting;
         vehicles = new ArrayList<>();
-        EventManager.listenTo("vehicles:add", (s, vehicle) -> vehicles.add((SelfDrivingVehicle) vehicle[0]));
-        EventManager.listenTo("timestep:end", (s,args) -> timestepHandler((Integer) args[0]));
+        EventManager.listenTo("vehicle:added", (s, vehicle) -> vehicles.add((SelfDrivingVehicle) vehicle[0]));
+        EventManager.listenTo("timestep:end", (s, args) -> timestepHandler((Integer) args[0]));
     }
 
     public void timestepHandler(int iteration)
     {
         vehicles.forEach(v -> {
-            if (rerouteRand.nextDouble() < REROUTE_PROBABILITY)
+            if (rerouteRand.nextDouble() <= REROUTE_PROBABILITY)
             {
-                logger.info("rerouting vehicle " + v.id);
+                logger.info("Rerouting vehicle " + v.id);
                 v.recalculateRoute();
             }
         });
+
+        vehicles = vehicles.stream().filter(v -> !v.isFinished()).collect(Collectors.toList());
 
         if (iteration % EXPMAP_UPDATE_FREQUENCY == 0)
         {

@@ -37,6 +37,7 @@ public class CellIterator {
                 cellIndex = cg.getCellCount(route) - 1;
             }
         }
+
         return cg.get(route, cellIndex);
     }
 

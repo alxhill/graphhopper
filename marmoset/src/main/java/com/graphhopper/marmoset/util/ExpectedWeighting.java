@@ -15,7 +15,7 @@ import java.util.List;
  */
 public class ExpectedWeighting extends FastestWeighting {
 
-    protected double[] expectedRoutes;
+    protected final double[] expectedRoutes;
 
     private static final Logger logger = LoggerFactory.getLogger(ExpectedWeighting.class);
 
@@ -37,12 +37,20 @@ public class ExpectedWeighting extends FastestWeighting {
 
     public void updateExpectedMap(double dampingFactor, List<SelfDrivingVehicle> vehicles)
     {
-        for (int i = 0; i < expectedRoutes.length; i++)
+        synchronized (expectedRoutes)
         {
-            expectedRoutes[i] *= dampingFactor;
-        }
+            for (int i = 0; i < expectedRoutes.length; i++)
+            {
+                expectedRoutes[i] *= dampingFactor;
+            }
 
-        vehicles.stream().map(SelfDrivingVehicle::getCurrentPath)
-                .forEach(edges -> edges.forEach(edge -> expectedRoutes[edge.getEdge()]++));
+            vehicles.stream().map(SelfDrivingVehicle::getCurrentPath)
+                .forEach(edges -> edges.forEach(edge -> {
+                    if (edge.getEdge() < expectedRoutes.length)
+                    {
+                        expectedRoutes[edge.getEdge()]++;
+                    }
+                }));
+        }
     }
 }

@@ -48,10 +48,10 @@ public class SelfDrivingVehicle extends BaseVehicle {
             return;
 
         edgeList = edges;
+        cellId = 0; // TODO: figure out where we should be if still on the same edge
 
         SelfDrivingVehicleIterator sdvRoute = (SelfDrivingVehicleIterator) route;
         sdvRoute.resetEdges(edgeList);
-
     }
 
     protected List<EdgeIteratorState> calculateRoute()

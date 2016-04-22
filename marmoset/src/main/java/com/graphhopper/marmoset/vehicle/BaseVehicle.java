@@ -97,7 +97,7 @@ public abstract class BaseVehicle implements Vehicle {
     @Override
     public void init()
     {
-        cellId = 0; // TODO: figure out which cell the vehicle should start at
+        cellId = 0;
         v = 0;
 
         cg = hopper.getCellGraph();
