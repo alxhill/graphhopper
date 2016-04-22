@@ -43,12 +43,16 @@ public class SelfDrivingVehicle extends BaseVehicle {
 
     public void recalculateRoute()
     {
+        cg.set(route, cellId, false);
+
         List<EdgeIteratorState> edges = calculateRoute();
         if (edges == null)
             return;
 
         edgeList = edges;
         cellId = 0; // TODO: figure out where we should be if still on the same edge
+
+        cg.set(route, cellId, true);
 
         SelfDrivingVehicleIterator sdvRoute = (SelfDrivingVehicleIterator) route;
         sdvRoute.resetEdges(edgeList);

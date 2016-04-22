@@ -31,6 +31,12 @@ public class ExpectedWeighting extends FastestWeighting {
     {
         double weight = super.calcWeight(edge, reverse, prevOrNextEdge);
 
+        if (edge.getEdge() < expectedRoutes.length)
+        {
+            double expectedVehicles = expectedRoutes[edge.getEdge()];
+            double density = expectedVehicles / edge.getDistance();
+
+        }
 
         return weight;
     }
