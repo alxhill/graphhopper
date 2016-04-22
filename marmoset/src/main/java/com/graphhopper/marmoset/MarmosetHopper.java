@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -44,7 +45,7 @@ public class MarmosetHopper {
 
     public MarmosetHopper() {
         hopper = new MarmosetGraphHopper();
-        vehicles = new ArrayList<>();
+        vehicles = Collections.synchronizedList(new ArrayList<>());
     }
 
     public void init()
@@ -74,7 +75,7 @@ public class MarmosetHopper {
         assert randPercent >= 0 && randPercent <= 1;
     }
 
-    public synchronized void addVehicle()
+    public void addVehicle()
     {
         Vehicle v;
         if (rand.nextDouble() < randPercent)
@@ -93,7 +94,7 @@ public class MarmosetHopper {
     public synchronized void startSimulation(int initialVehicles)
     {
         logger.info("Starting simulation with " + initialVehicles + " vehicles");
-        IntStream.range(0, initialVehicles).forEach(v -> addVehicle());
+        IntStream.range(0, initialVehicles).parallel().forEach(v -> addVehicle());
     }
 
     public boolean timestep()
@@ -114,7 +115,8 @@ public class MarmosetHopper {
         if (webMode)
             vehicles.stream().forEach(Vehicle::updateLocation);
 
-        vehicles = vehicles.parallelStream().filter(v -> !v.isFinished()).collect(Collectors.toList());
+        vehicles = Collections.synchronizedList(
+                vehicles.parallelStream().filter(v -> !v.isFinished()).collect(Collectors.toList()));
 
         logger.info("Timestep took " + (System.nanoTime() - startTimestep) / 1e6 + "ms");
         return true;

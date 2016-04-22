@@ -38,9 +38,7 @@ public class Marmoset {
         {
             startFileServer();
             startWebSocketServer();
-        }
-        else if (args[0].equals("--file"))
-        {
+        } else if (args[0].equals("--file")) {
             runOfflineSimulation(args[1], Integer.parseInt(args[2]));
             logger.info("Simulation complete.");
             return;
@@ -63,6 +61,8 @@ public class Marmoset {
         start(initialVehicles);
         while (mh.getVehicleCount() > 0 && mh.timestep(false))
         {
+            EventManager.trigger("timestep:start", iteration);
+            EventManager.trigger("timestep:end", iteration);
             logger.info("===ITERATION [" + iteration + "] VEHICLES [" + mh.getVehicleCount() + "]===");
             MarmosetHopper.Metrics metrics = mh.getMetrics();
             if (metrics == null)
