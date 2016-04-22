@@ -1,9 +1,11 @@
 package com.graphhopper.marmoset;
 
 import com.graphhopper.GraphHopper;
+import com.graphhopper.marmoset.event.EventManager;
 import com.graphhopper.marmoset.util.CellGraph;
 import com.graphhopper.marmoset.util.ExpectedWeighting;
 import com.graphhopper.marmoset.util.Location;
+import com.graphhopper.marmoset.vehicle.MultiSDVController;
 import com.graphhopper.marmoset.vehicle.RandomVehicle;
 import com.graphhopper.marmoset.vehicle.SelfDrivingVehicle;
 import com.graphhopper.marmoset.vehicle.Vehicle;
@@ -30,6 +32,8 @@ public class MarmosetHopper {
     protected MarmosetGraphHopper hopper;
     protected CellGraph cellGraph;
     protected List<Vehicle> vehicles;
+
+    protected MultiSDVController sdvController;
 
     protected boolean isPaused;
 
@@ -80,8 +84,10 @@ public class MarmosetHopper {
         v.init();
         if (v.isFinished())
             addVehicle();
-        else
+        else {
             vehicles.add(v);
+            EventManager.trigger("vehicle:added", v);
+        }
     }
 
     public synchronized void startSimulation(int initialVehicles)
@@ -215,7 +221,8 @@ public class MarmosetHopper {
                 if (expectedWeighting == null)
                 {
                     int maxId = this.getGraphHopperStorage().getAllEdges().getMaxId();
-                    expectedWeighting = new ExpectedWeighting(encoder, wMap, vehicles, maxId);
+                    expectedWeighting = new ExpectedWeighting(encoder, wMap, maxId);
+                    sdvController = new MultiSDVController(expectedWeighting);
                 }
 
                 return expectedWeighting;

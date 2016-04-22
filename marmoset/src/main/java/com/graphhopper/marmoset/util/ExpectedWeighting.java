@@ -1,7 +1,6 @@
 package com.graphhopper.marmoset.util;
 
 import com.graphhopper.marmoset.vehicle.SelfDrivingVehicle;
-import com.graphhopper.marmoset.vehicle.Vehicle;
 import com.graphhopper.routing.util.FastestWeighting;
 import com.graphhopper.routing.util.FlagEncoder;
 import com.graphhopper.util.EdgeIteratorState;
@@ -16,16 +15,13 @@ import java.util.List;
  */
 public class ExpectedWeighting extends FastestWeighting {
 
-    protected final List<Vehicle> vehicles;
-    protected final double DAMPING_FACTOR = 0.6;
     protected double[] expectedRoutes;
 
     private static final Logger logger = LoggerFactory.getLogger(ExpectedWeighting.class);
 
-    public ExpectedWeighting(FlagEncoder encoder, PMap pMap, List<Vehicle> vehicles, int maxId)
+    public ExpectedWeighting(FlagEncoder encoder, PMap pMap, int maxId)
     {
         super(encoder, pMap);
-        this.vehicles = vehicles;
         expectedRoutes = new double[maxId];
         logger.info("Created new expected weighting");
     }
@@ -39,15 +35,14 @@ public class ExpectedWeighting extends FastestWeighting {
         return weight;
     }
 
-    public void updateExpectedMap()
+    public void updateExpectedMap(double dampingFactor, List<SelfDrivingVehicle> vehicles)
     {
         for (int i = 0; i < expectedRoutes.length; i++)
         {
-            expectedRoutes[i] *= DAMPING_FACTOR;
+            expectedRoutes[i] *= dampingFactor;
         }
 
-        vehicles.stream().map(v -> ((SelfDrivingVehicle) v).getCurrentPath())
+        vehicles.stream().map(SelfDrivingVehicle::getCurrentPath)
                 .forEach(edges -> edges.forEach(edge -> expectedRoutes[edge.getEdge()]++));
-
     }
 }

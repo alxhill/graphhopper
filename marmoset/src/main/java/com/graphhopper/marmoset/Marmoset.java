@@ -1,5 +1,6 @@
 package com.graphhopper.marmoset;
 
+import com.graphhopper.marmoset.event.EventManager;
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.SimpleWebServer;
 import org.slf4j.Logger;
@@ -29,6 +30,7 @@ public class Marmoset {
 
     public static void main(String[] args) throws IOException, InterruptedException
     {
+        EventManager.trigger("init:start");
         mh = new MarmosetHopper();
         mh.init();
 
@@ -45,6 +47,7 @@ public class Marmoset {
         }
 
         System.out.println("Press enter to terminate");
+        EventManager.trigger("init:end");
         try
         {
             System.in.read();
@@ -78,16 +81,19 @@ public class Marmoset {
         {
             isRunning = true;
             iteration = 0;
+            EventManager.trigger("start", initialVehicles);
             mh.startSimulation(initialVehicles);
         }
         else if (mh.paused())
         {
+            EventManager.trigger("unpause");
             mh.unpause();
         }
     }
 
     public static void pause()
     {
+        EventManager.trigger("pause");
         mh.pause();
     }
 
@@ -122,8 +128,10 @@ public class Marmoset {
     }
 
     public static void nextTimestep() {
+        EventManager.trigger("timestep:start", iteration);
         if (mh.timestep())
         {
+            EventManager.trigger("timestep:end", iteration);
             logger.info("===ITERATION [" + iteration + "]===");
             mh.getMetrics();
             iteration++;

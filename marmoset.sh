@@ -33,6 +33,9 @@ elif [ "$ACTION" = "test" ]; then
     ${MAVEN} test
 elif [ "$ACTION" = "lines" ]; then
     find marmoset -name "*.java" -o -name "*.js" | xargs wc -l
+else
+    echo "$ACTION is not a valid action, don't do that k?"
+    exit
 fi
 
 E_CODE=$?

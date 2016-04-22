@@ -27,6 +27,35 @@ public class SelfDrivingVehicle extends BaseVehicle {
     @Override
     public VehicleIterator getVehicleIterator()
     {
+        edgeList = calculateRoute();
+
+        if (edgeList == null)
+            return null;
+
+        FlagEncoder carEncoder = hopper.getGraphHopper().getEncodingManager().getEncoder("car");
+        return new SelfDrivingVehicleIterator(edgeList, carEncoder);
+    }
+
+    public List<EdgeIteratorState> getCurrentPath()
+    {
+        return edgeList;
+    }
+
+    public void recalculateRoute()
+    {
+        List<EdgeIteratorState> edges = calculateRoute();
+        if (edges == null)
+            return;
+
+        edgeList = edges;
+
+        SelfDrivingVehicleIterator sdvRoute = (SelfDrivingVehicleIterator) route;
+        sdvRoute.resetEdges(edgeList);
+
+    }
+
+    protected List<EdgeIteratorState> calculateRoute()
+    {
         GraphHopper gh = hopper.getGraphHopper();
 
         GHRequest ghRequest = new GHRequest(loc.getLat(), loc.getLon(), dest.getLat(), dest.getLon());
@@ -48,20 +77,14 @@ public class SelfDrivingVehicle extends BaseVehicle {
         }
 
         Path p = paths.get(0);
-        edgeList = p.calcEdges();
+        List<EdgeIteratorState> edges = p.calcEdges();
 
-        if (edgeList.size() <= 1)
+        if (edges.size() <= 1)
         {
             finish("Edge list too short");
             return null;
         }
 
-        FlagEncoder carEncoder = gh.getEncodingManager().getEncoder("car");
-        return new SelfDrivingVehicleIterator(edgeList, carEncoder);
-    }
-
-    public List<EdgeIteratorState> getCurrentPath()
-    {
-        return edgeList;
+        return edges;
     }
 }
