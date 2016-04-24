@@ -70,6 +70,18 @@ function initButtons(carSet) {
         count = Math.max(1, count);
         carSet.ws.send("addVehicles|" + count);
     });
+
+    document.getElementById("displayVehicles").addEventListener("click", function () {
+        var str = document.getElementById("vehicleString").value;
+        document.getElementById("vehicleString").value = "";
+
+        str.split(",").map(function (s) {
+            var a = s.split("|").map(function (v) {
+                return parseFloat(v)
+            });
+            return new Car(a[0], a[3], a[1], a[2]);
+        });
+    });
 }
 
 function initAll() {
