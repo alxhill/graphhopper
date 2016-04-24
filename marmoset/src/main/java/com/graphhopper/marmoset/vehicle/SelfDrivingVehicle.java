@@ -72,14 +72,14 @@ public class SelfDrivingVehicle extends DijkstraVehicle {
         GHResponse ghResponse = new GHResponse();
         List<Path> paths = gh.calcPaths(ghRequest, ghResponse);
 
-        if (expectedTravelTime == 0)
-            expectedTravelTime = ghResponse.getBest().getTime();
-
         if (ghResponse.hasErrors())
         {
             finish("Routing failed (id " + id + "):" + ghResponse.getErrors().stream().map(Throwable::toString).collect(Collectors.joining("\n")));
             return null;
         }
+
+        if (expectedTravelTime == 0)
+            expectedTravelTime = ghResponse.getBest().getTime();
 
         if (paths.size() == 0)
         {

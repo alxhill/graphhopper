@@ -34,12 +34,13 @@ public class DijkstraVehicle extends BaseVehicle {
         GHRequest ghRequest = new GHRequest(loc.getLat(), loc.getLon(), dest.getLat(), dest.getLon());
         GHResponse ghResponse = new GHResponse();
         List<Path> paths = gh.calcPaths(ghRequest, ghResponse);
-        expectedTravelTime = ghResponse.getBest().getTime();
         if (ghResponse.hasErrors())
         {
             finish("Routing failed (id "+id+"):" + ghResponse.getErrors().stream().map(Throwable::toString).collect(Collectors.joining("\n")));
             return null;
         }
+
+        expectedTravelTime = ghResponse.getBest().getTime();
 
         if (paths.size() == 0)
         {
