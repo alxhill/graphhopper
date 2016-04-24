@@ -20,12 +20,15 @@ public class Marmoset {
     private static MarmosetSocketServer mss;
     private static NanoHTTPD fileServer;
     private static boolean isRunning = false;
+    private static boolean serverEnabled = true;
 
     private static Logger logger = LoggerFactory.getLogger(Marmoset.class);
 
     private static int iteration;
 
     public static String metricFolder;
+
+    public static int ITERATION_OUTPUT_FREQ = 1000;
 
     public static void main(String[] args) throws IOException, InterruptedException
     {
@@ -35,11 +38,12 @@ public class Marmoset {
 
         if (args.length == 0 || args[0].equals("--web"))
         {
-            metricFolder = "simulations/realtime- " + (System.currentTimeMillis() / 1000L);
-            new File(metricFolder).mkdirs();
+            initialiseMetrics("realtime");
             startFileServer();
             startWebSocketServer();
         } else if (args[0].equals("--file")) {
+            serverEnabled = false;
+            initialiseMetrics(args[1]);
             runOfflineSimulation(Integer.parseInt(args[1]));
             logger.info("Simulation complete.");
             return;
@@ -52,38 +56,49 @@ public class Marmoset {
             System.in.read();
         } catch (Throwable ignored) {}
 
+        EventManager.trigger("online:stop");
+
         System.exit(0);
+    }
+
+    private static void initialiseMetrics(String name) throws FileNotFoundException, UnsupportedEncodingException
+    {
+        metricFolder = "simulations/" + name + "-" + (System.currentTimeMillis() / 1000L);
+        new File(metricFolder).mkdirs();
+
+        PrintWriter p = new PrintWriter(metricFolder + "/simulation.csv", "UTF-8");
+        p.println(MarmosetHopper.Metrics.getHeader());
+
+        EventManager.listenTo("timestep:end", (n, a) -> {
+            int iteration = (Integer) a[0];
+            if (iteration % ITERATION_OUTPUT_FREQ == 0)
+            {
+                try
+                {
+                    PrintWriter iterPrint = new PrintWriter(metricFolder + "/iteration" + iteration, "UTF-8");
+                    iterPrint.println(mh.getVehicleString());
+                    iterPrint.close();
+                } catch (IOException ignored) {}
+            }
+        });
+
+        EventManager.listenTo("timestep:metrics", (n, m) -> {
+            p.println(m[0].toString());
+            p.flush();
+        });
+
+        EventManager.listenTo("offline:stop", (n, a) -> p.close());
+        EventManager.listenTo("online:stop", (n, a) -> p.close());
     }
 
     private static void runOfflineSimulation(int initialVehicles) throws IOException
     {
-        metricFolder = "simulations/" + initialVehicles + "-" + (System.currentTimeMillis() / 1000L);
-        new File(metricFolder).mkdirs();
-        PrintWriter p = new PrintWriter(metricFolder + "/simulation.csv", "UTF-8");
-        p.println(MarmosetHopper.Metrics.getHeader());
         start(initialVehicles);
-        while (mh.getVehicleCount() > 0 && mh.timestep(false))
+        while (mh.getVehicleCount() > 0)
         {
-            EventManager.trigger("timestep:start", iteration);
-            EventManager.trigger("timestep:end", iteration);
-            logger.info("===ITERATION [" + iteration + "] VEHICLES [" + mh.getVehicleCount() + "]===");
-            MarmosetHopper.Metrics metrics = mh.getMetrics();
-            if (metrics == null)
-                continue;
-            logger.info(metrics.getDescription());
-            p.println(metrics.toString());
-            p.flush();
-
-            if (iteration % 1000 == 0)
-            {
-                PrintWriter iterPrint = new PrintWriter(metricFolder + "/iteration" + iteration, "UTF-8");
-                iterPrint.println(mh.getVehicleString());
-                iterPrint.close();
-            }
-
-            iteration++;
+            nextTimestep();
         }
-        p.close();
+        EventManager.trigger("offline:stop");
     }
 
     public static void start(int initialVehicles)
@@ -143,11 +158,22 @@ public class Marmoset {
         if (mh.timestep())
         {
             EventManager.trigger("timestep:end", iteration);
-            logger.info("===ITERATION [" + iteration + "]===");
-            mh.getMetrics();
+            logger.info("===ITERATION [" + iteration + "] VEHICLES [" + mh.getVehicleCount() + "]===");
+            MarmosetHopper.Metrics metrics = mh.getMetrics();
+            if (metrics == null)
+                return;
+            logger.info(metrics.getDescription());
+
+            EventManager.trigger("timestep:metrics", metrics);
+
             iteration++;
-            ByteBuffer data = mh.getVehicleBytes();
-            mss.distributeData(data);
+
+            if (serverEnabled)
+            {
+                ByteBuffer data = mh.getVehicleBytes();
+                mss.distributeData(data);
+            }
+
         }
         else
         {

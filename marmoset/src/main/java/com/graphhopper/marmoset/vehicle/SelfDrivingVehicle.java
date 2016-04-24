@@ -49,6 +49,8 @@ public class SelfDrivingVehicle extends DijkstraVehicle {
         rerouteCount++;
         cg.set(route, cellId, false);
 
+        updateLocation();
+
         List<EdgeIteratorState> edges = calculateRoute();
         if (edges == null)
             return;
