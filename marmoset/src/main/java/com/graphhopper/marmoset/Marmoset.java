@@ -73,6 +73,7 @@ public class Marmoset {
             int iteration = (Integer) a[0];
             if (iteration % ITERATION_OUTPUT_FREQ == 0)
             {
+                mh.updateLocations();
                 try
                 {
                     PrintWriter iterPrint = new PrintWriter(metricFolder + "/iteration" + iteration, "UTF-8");

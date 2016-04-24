@@ -119,6 +119,11 @@ public class MarmosetHopper {
         return true;
     }
 
+    public synchronized void updateLocations()
+    {
+        vehicles.parallelStream().forEach(Vehicle::updateLocation);
+    }
+
     public synchronized Metrics getMetrics()
     {
         if (vehicles.size() == 0)
