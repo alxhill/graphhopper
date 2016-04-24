@@ -97,7 +97,7 @@ var carSet = {
             this._carCount = 0;
         }
 
-        this.ws = new WebSocket("ws://localhost:8888");
+        this.ws = new WebSocket("ws://"+location.hostname+":8888");
         this.ws.binaryType = "arraybuffer";
         this.ws.onmessage = function (e) {
             this.processData(e.data);
