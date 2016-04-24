@@ -1,5 +1,6 @@
 package com.graphhopper.marmoset.vehicle;
 
+import com.graphhopper.marmoset.Marmoset;
 import com.graphhopper.marmoset.MarmosetHopper;
 import com.graphhopper.marmoset.util.CellGraph;
 import com.graphhopper.marmoset.util.CellIterator;
@@ -94,7 +95,7 @@ public abstract class BaseVehicle implements Vehicle {
     // called only if there's no error, so we use this to capture metrics
     protected void finish()
     {
-        String filename = String.format("simulations/vehicle-%d-%d.csv", id, System.currentTimeMillis() / 1000L);
+        String filename = Marmoset.metricFolder + "/vehicle-" + id;
         try
         {
             PrintWriter p = new PrintWriter(filename);

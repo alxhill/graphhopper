@@ -25,6 +25,7 @@ public class Marmoset {
 
     private static int iteration;
 
+    public static String metricFolder;
 
     public static void main(String[] args) throws IOException, InterruptedException
     {
@@ -34,10 +35,12 @@ public class Marmoset {
 
         if (args.length == 0 || args[0].equals("--web"))
         {
+            metricFolder = "simulations/realtime- " + (System.currentTimeMillis() / 1000L);
+            new File(metricFolder).mkdirs();
             startFileServer();
             startWebSocketServer();
         } else if (args[0].equals("--file")) {
-            runOfflineSimulation(args[1], Integer.parseInt(args[2]));
+            runOfflineSimulation(Integer.parseInt(args[1]));
             logger.info("Simulation complete.");
             return;
         }
@@ -52,9 +55,11 @@ public class Marmoset {
         System.exit(0);
     }
 
-    private static void runOfflineSimulation(String outfile, int initialVehicles) throws IOException
+    private static void runOfflineSimulation(int initialVehicles) throws IOException
     {
-        PrintWriter p = new PrintWriter("simulations/" + outfile, "UTF-8");
+        metricFolder = "simulations/" + initialVehicles + "-" + (System.currentTimeMillis() / 1000L);
+        new File(metricFolder).mkdirs();
+        PrintWriter p = new PrintWriter(metricFolder + "/simulation.csv", "UTF-8");
         p.println(MarmosetHopper.Metrics.getHeader());
         start(initialVehicles);
         while (mh.getVehicleCount() > 0 && mh.timestep(false))
@@ -71,7 +76,7 @@ public class Marmoset {
 
             if (iteration % 1000 == 0)
             {
-                PrintWriter iterPrint = new PrintWriter("simulations/" + (outfile + iteration), "UTF-8");
+                PrintWriter iterPrint = new PrintWriter(metricFolder + "/iteration" + iteration, "UTF-8");
                 iterPrint.println(mh.getVehicleString());
                 iterPrint.close();
             }
