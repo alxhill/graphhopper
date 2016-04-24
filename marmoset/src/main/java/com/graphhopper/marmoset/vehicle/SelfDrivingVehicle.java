@@ -9,13 +9,16 @@ import com.graphhopper.routing.Path;
 import com.graphhopper.routing.util.FlagEncoder;
 import com.graphhopper.util.EdgeIteratorState;
 
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
  * Created by alexander on 20/04/2016.
  */
-public class SelfDrivingVehicle extends BaseVehicle {
+public class SelfDrivingVehicle extends DijkstraVehicle {
+
+    protected int rerouteCount = 0;
 
     public SelfDrivingVehicle(MarmosetHopper hopper, Location start, Location dest)
     {
@@ -43,6 +46,7 @@ public class SelfDrivingVehicle extends BaseVehicle {
 
     public void recalculateRoute()
     {
+        rerouteCount++;
         cg.set(route, cellId, false);
 
         List<EdgeIteratorState> edges = calculateRoute();
@@ -68,9 +72,12 @@ public class SelfDrivingVehicle extends BaseVehicle {
         GHResponse ghResponse = new GHResponse();
         List<Path> paths = gh.calcPaths(ghRequest, ghResponse);
 
+        if (expectedTravelTime == 0)
+            expectedTravelTime = ghResponse.getBest().getTime();
+
         if (ghResponse.hasErrors())
         {
-            finish("Routing failed (id "+id+"):" + ghResponse.getErrors().stream().map(Throwable::toString).collect(Collectors.joining("\n")));
+            finish("Routing failed (id " + id + "):" + ghResponse.getErrors().stream().map(Throwable::toString).collect(Collectors.joining("\n")));
             return null;
         }
 
@@ -91,4 +98,12 @@ public class SelfDrivingVehicle extends BaseVehicle {
 
         return edges;
     }
+
+    @Override
+    public void printMetrics(PrintWriter p)
+    {
+        super.printMetrics(p);
+        p.println("reroutes: " + rerouteCount);
+    }
+
 }

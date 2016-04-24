@@ -25,7 +25,6 @@ public class ExpectedWeighting extends FastestWeighting {
         super(encoder, pMap);
         expectedRoutes = new double[maxId];
         logger.info("Created new expected weighting");
-        Thread.dumpStack();
     }
 
     @Override
@@ -40,12 +39,12 @@ public class ExpectedWeighting extends FastestWeighting {
             {
                 double density = 1000 * expectedVehicles / edge.getDistance();
 
-                if (Math.random() < 0.0001)
-                {
-                    logger.info(String.format(
-                            "ev: %.2f, dns: %.2f, dst: %.2f, spd: %.2f, exp: %.2f",
-                            expectedVehicles, density, edge.getDistance(), speed, speed * densityFunction(density)));
-                }
+//                if (Math.random() < 0.0001)
+//                {
+//                    logger.info(String.format(
+//                            "ev: %.2f, dns: %.2f, dst: %.2f, spd: %.2f, exp: %.2f",
+//                            expectedVehicles, density, edge.getDistance(), speed, speed * densityFunction(density)));
+//                }
 
                 speed *= densityFunction(density);
             }

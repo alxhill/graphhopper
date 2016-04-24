@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 /**
@@ -36,13 +38,14 @@ public class MultiSDVController {
 
     public void timestepHandler(int iteration)
     {
-        vehicles.forEach(v -> {
-            if (rerouteRand.nextDouble() <= REROUTE_PROBABILITY)
-            {
-                logger.info("Rerouting vehicle " + v.id);
-                v.recalculateRoute();
-            }
-        });
+        ExecutorService es = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        vehicles.stream().filter(v -> rerouteRand.nextDouble() <= REROUTE_PROBABILITY).map(v -> {
+            logger.info("Rerouting vehicle " + v.id);
+            return (Runnable) v::recalculateRoute;
+        }).forEach(es::execute);
+
+        es.shutdown();
+        logger.info("Rerouting process complete");
 
         vehicles = vehicles.stream().filter(v -> !v.isFinished()).collect(Collectors.toList());
 

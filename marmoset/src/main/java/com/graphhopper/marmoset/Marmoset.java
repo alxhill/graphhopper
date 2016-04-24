@@ -6,9 +6,7 @@ import fi.iki.elonen.SimpleWebServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.stream.IntStream;
@@ -70,6 +68,14 @@ public class Marmoset {
             logger.info(metrics.getDescription());
             p.println(metrics.toString());
             p.flush();
+
+            if (iteration % 1000 == 0)
+            {
+                PrintWriter iterPrint = new PrintWriter("simulations/" + (outfile + iteration), "UTF-8");
+                iterPrint.println(mh.getVehicleString());
+                iterPrint.close();
+            }
+
             iteration++;
         }
         p.close();

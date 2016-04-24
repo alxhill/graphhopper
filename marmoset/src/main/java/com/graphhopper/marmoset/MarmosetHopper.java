@@ -5,10 +5,7 @@ import com.graphhopper.marmoset.event.EventManager;
 import com.graphhopper.marmoset.util.CellGraph;
 import com.graphhopper.marmoset.util.ExpectedWeighting;
 import com.graphhopper.marmoset.util.Location;
-import com.graphhopper.marmoset.vehicle.MultiSDVController;
-import com.graphhopper.marmoset.vehicle.RandomVehicle;
-import com.graphhopper.marmoset.vehicle.SelfDrivingVehicle;
-import com.graphhopper.marmoset.vehicle.Vehicle;
+import com.graphhopper.marmoset.vehicle.*;
 import com.graphhopper.routing.util.FlagEncoder;
 import com.graphhopper.routing.util.Weighting;
 import com.graphhopper.routing.util.WeightingMap;
@@ -34,12 +31,12 @@ public class MarmosetHopper {
     protected CellGraph cellGraph;
     protected List<Vehicle> vehicles;
 
-    protected MultiSDVController sdvController;
+    protected static MultiSDVController sdvController;
 
     protected boolean isPaused;
 
     protected Random rand = new Random(999);
-    protected double randPercent;
+    protected double sdvPercent;
 
     private static Logger logger = LoggerFactory.getLogger(MarmosetHopper.class);
 
@@ -71,17 +68,17 @@ public class MarmosetHopper {
         cellGraph = new CellGraph(hopper.getGraphHopperStorage().getBaseGraph(), cellSize);
         cellGraph.init();
 
-        randPercent = args.getDouble("marmoset.randpercent", 0.2);
-        assert randPercent >= 0 && randPercent <= 1;
+        sdvPercent = args.getDouble("marmoset.sdvpercent", 1);
+        assert sdvPercent >= 0 && sdvPercent <= 1;
     }
 
     public void addVehicle()
     {
         Vehicle v;
-        if (rand.nextDouble() < randPercent)
-            v = new RandomVehicle(this, Location.randLondon(), Location.randCentralLondon());
-        else
+        if (rand.nextDouble() < sdvPercent)
             v = new SelfDrivingVehicle(this, Location.randLondon(), Location.randCentralLondon());
+        else
+            v = new DijkstraVehicle(this, Location.randLondon(), Location.randCentralLondon());
         v.init();
         if (v.isFinished())
             addVehicle();
@@ -179,10 +176,10 @@ public class MarmosetHopper {
     }
 
     public static class Metrics {
-        public int slowed;
-        public double averageCells;
-        public long notAtMax;
-        public int vehicleCount;
+        public final int slowed;
+        public final double averageCells;
+        public final long notAtMax;
+        public final int vehicleCount;
 
         public Metrics(int slowed, double averageCells, long notAtMax, int vehicleCount)
         {
@@ -211,12 +208,12 @@ public class MarmosetHopper {
         }
     }
 
-    public class MarmosetGraphHopper extends GraphHopper {
+    public static class MarmosetGraphHopper extends GraphHopper {
 
-        public ExpectedWeighting expectedWeighting;
+        public static ExpectedWeighting expectedWeighting;
 
         @Override
-        public Weighting createWeighting(WeightingMap wMap, FlagEncoder encoder)
+        public synchronized Weighting createWeighting(WeightingMap wMap, FlagEncoder encoder)
         {
             if ("expected".equalsIgnoreCase(wMap.getWeighting()))
             {
@@ -226,7 +223,6 @@ public class MarmosetHopper {
                     expectedWeighting = new ExpectedWeighting(encoder, wMap, maxId);
                     sdvController = new MultiSDVController(expectedWeighting);
                 }
-
                 return expectedWeighting;
             }
             return super.createWeighting(wMap, encoder);

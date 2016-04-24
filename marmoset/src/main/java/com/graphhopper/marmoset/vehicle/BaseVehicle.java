@@ -10,6 +10,8 @@ import com.graphhopper.util.PointList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.nio.ByteBuffer;
 import java.util.Random;
 
@@ -89,8 +91,21 @@ public abstract class BaseVehicle implements Vehicle {
         finished = true;
     }
 
+    // called only if there's no error, so we use this to capture metrics
     protected void finish()
     {
+        String filename = String.format("simulations/vehicle-%d-%d.csv", id, System.currentTimeMillis() / 1000L);
+        try
+        {
+            PrintWriter p = new PrintWriter(filename);
+            printMetrics(p);
+            p.close();
+        }
+        catch (FileNotFoundException e)
+        {
+            e.printStackTrace();
+        }
+
         finish(null);
     }
 
@@ -248,5 +263,10 @@ public abstract class BaseVehicle implements Vehicle {
         int pos = b.position();
         b.putInt(id).putInt(v).putDouble(loc.getLat()).putDouble(loc.getLon());
         logger.debug(String.format("[%d]%d|%d|%f|%f", id, b.getInt(pos), b.getInt(pos + 4), b.getDouble(pos + 8), b.getDouble(pos + 16)));
+    }
+
+    public void printMetrics(PrintWriter p)
+    {
+
     }
 }
