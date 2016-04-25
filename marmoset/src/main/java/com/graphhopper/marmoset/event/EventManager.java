@@ -19,20 +19,22 @@ public class EventManager {
 
     public static void listenTo(String name, EventHandler handler)
     {
-        if (!handlers.containsKey(name))
+        synchronized (handlers)
         {
-            handlers.put(name, new ArrayList<>());
-        }
+            if (!handlers.containsKey(name))
+            {
+                handlers.put(name, new ArrayList<>());
+            }
 
-        handlers.get(name).add(handler);
+            handlers.get(name).add(handler);
+        }
     }
 
-    public static void trigger(String name, Object ...args)
+    public static synchronized void trigger(String name, Object ...args)
     {
         if (!handlers.containsKey(name))
             return;
 
         handlers.get(name).forEach(h -> h.handle(name, args));
-
     }
 }
