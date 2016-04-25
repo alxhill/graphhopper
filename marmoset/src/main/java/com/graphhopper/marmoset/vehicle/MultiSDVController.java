@@ -62,7 +62,6 @@ public class MultiSDVController {
             logger.info("Rerouting vehicle " + v.id);
             es.submit((Runnable) v::recalculateRoute);
             vehicles.addLast(v);
-            logger.info("vehicle count: " + vehicles.size());
         }
 
         es.shutdown();
