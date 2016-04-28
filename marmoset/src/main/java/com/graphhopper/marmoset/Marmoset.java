@@ -64,7 +64,7 @@ public class Marmoset {
     private static void initialiseMetrics(String name) throws FileNotFoundException, UnsupportedEncodingException
     {
         metricFolder = "simulations/" + name + "-" + (System.currentTimeMillis() / 1000L);
-        new File(metricFolder).mkdirs();
+        new File(metricFolder + "/vehicles").mkdirs();
 
         PrintWriter p = new PrintWriter(metricFolder + "/simulation.csv", "UTF-8");
         p.println(MarmosetHopper.Metrics.getHeader());

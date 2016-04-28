@@ -95,7 +95,7 @@ public abstract class BaseVehicle implements Vehicle {
     // called only if there's no error, so we use this to capture metrics
     protected void finish()
     {
-        String filename = Marmoset.metricFolder + "/vehicle-" + id;
+        String filename = Marmoset.metricFolder + "/vehicles/" + id;
         try
         {
             PrintWriter p = new PrintWriter(filename);
