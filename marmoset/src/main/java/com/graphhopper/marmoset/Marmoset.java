@@ -43,7 +43,10 @@ public class Marmoset {
             startWebSocketServer();
         } else if (args[0].equals("--file")) {
             serverEnabled = false;
-            initialiseMetrics(args[1]);
+            String name = args[1];
+            if (args.length > 2)
+                name += "-" + args[2];
+            initialiseMetrics(name);
             runOfflineSimulation(Integer.parseInt(args[1]));
             logger.info("Simulation complete.");
             return;
@@ -95,9 +98,18 @@ public class Marmoset {
     private static void runOfflineSimulation(int initialVehicles) throws IOException
     {
         start(initialVehicles);
+        int vehCount = mh.getVehicleCount();
         while (mh.getVehicleCount() > 0)
         {
             nextTimestep();
+            // termination conditions so it doesn't loop endlessly if one or two get stuck
+            if (vehCount == mh.getVehicleCount() &&
+                    mh.getMetrics().averageCells == 0 &&
+                    vehCount < 50)
+            {
+                logger.info("Terminating early due to permanent loop occurring");
+                break;
+            }
         }
         EventManager.trigger("offline:stop");
     }

@@ -21,4 +21,9 @@ public class SelfDrivingVehicleIterator extends DijkstraVehicleIterator {
         this.edges = edgeList;
         edges.remove(edges.size() - 1);
     }
+
+    public int getRemainingEdges()
+    {
+        return edges.size() - index;
+    }
 }

@@ -39,9 +39,9 @@ public class SelfDrivingVehicle extends DijkstraVehicle {
         return new SelfDrivingVehicleIterator(edgeList, carEncoder);
     }
 
-    public List<EdgeIteratorState> getCurrentPath()
+    public SelfDrivingVehicleIterator getCurrentPath()
     {
-        return edgeList;
+        return (SelfDrivingVehicleIterator) route.duplicate();
     }
 
     public void recalculateRoute()

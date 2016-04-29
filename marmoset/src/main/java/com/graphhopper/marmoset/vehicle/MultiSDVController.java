@@ -44,10 +44,6 @@ public class MultiSDVController {
     public void timestepHandler(int iteration)
     {
         ExecutorService es = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-//        vehicles.stream().filter(v -> rerouteRand.nextDouble() <= REROUTE_PROBABILITY).map(v -> {
-//            logger.info("Rerouting vehicle " + v.id);
-//            return (Runnable) v::recalculateRoute;
-//        }).forEach(es::submit);
 
         int rerouteCount = (int) (REROUTE_PROBABILITY * vehicles.size());
         for (int i = 0; i < rerouteCount; i++)

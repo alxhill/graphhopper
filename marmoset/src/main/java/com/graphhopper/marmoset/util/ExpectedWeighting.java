@@ -1,6 +1,7 @@
 package com.graphhopper.marmoset.util;
 
 import com.graphhopper.marmoset.vehicle.SelfDrivingVehicle;
+import com.graphhopper.marmoset.vehicle.SelfDrivingVehicleIterator;
 import com.graphhopper.routing.util.FastestWeighting;
 import com.graphhopper.routing.util.FlagEncoder;
 import com.graphhopper.util.EdgeIteratorState;
@@ -38,14 +39,6 @@ public class ExpectedWeighting extends FastestWeighting {
             if (expectedVehicles > 0)
             {
                 double density = 1000 * expectedVehicles / edge.getDistance();
-
-//                if (Math.random() < 0.0001)
-//                {
-//                    logger.info(String.format(
-//                            "ev: %.2f, dns: %.2f, dst: %.2f, spd: %.2f, exp: %.2f",
-//                            expectedVehicles, density, edge.getDistance(), speed, speed * densityFunction(density)));
-//                }
-
                 speed *= densityFunction(density);
             }
         }
@@ -66,14 +59,18 @@ public class ExpectedWeighting extends FastestWeighting {
                 expectedRoutes[i] *= dampingFactor;
             }
 
-            List<List<EdgeIteratorState>> routes = vehicles.stream().map(SelfDrivingVehicle::getCurrentPath).collect(Collectors.toList());
-            for (List<EdgeIteratorState> route : routes)
+            List<SelfDrivingVehicleIterator> routes = vehicles.stream()
+                    .map(SelfDrivingVehicle::getCurrentPath).collect(Collectors.toList());
+            for (SelfDrivingVehicleIterator route : routes)
             {
-                for (int i = 0; i < route.size(); i++)
+                int i = 0;
+                double totalLen = route.getRemainingEdges();
+                while (route.next())
                 {
-                    int edge = route.get(i).getEdge();
+                    i++;
+                    int edge = route.getEdge();
                     if (edge < expectedRoutes.length)
-                        expectedRoutes[edge] += progressFunction(i / (double) route.size());
+                        expectedRoutes[edge] += progressFunction(i / totalLen);
                 }
             }
         }
