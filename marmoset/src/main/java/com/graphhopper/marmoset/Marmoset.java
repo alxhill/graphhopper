@@ -101,7 +101,7 @@ public class Marmoset {
         int vehCount = mh.getVehicleCount();
         while (mh.getVehicleCount() > 0)
         {
-            nextTimestep();
+            nextTimestep(false);
             // termination conditions so it doesn't loop endlessly if one or two get stuck
             if (vehCount == mh.getVehicleCount() &&
                     mh.getMetrics().averageCells == 0 &&
@@ -166,9 +166,9 @@ public class Marmoset {
         }
     }
 
-    public static void nextTimestep() {
+    public static void nextTimestep(boolean webMode) {
         EventManager.trigger("timestep:start", iteration);
-        if (mh.timestep())
+        if (mh.timestep(webMode))
         {
             EventManager.trigger("timestep:end", iteration);
             logger.info("===ITERATION [" + iteration + "] VEHICLES [" + mh.getVehicleCount() + "]===");

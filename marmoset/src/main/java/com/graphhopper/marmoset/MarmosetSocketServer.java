@@ -82,7 +82,7 @@ public class MarmosetSocketServer extends WebSocketServer {
         }
         else if (s.equals("next"))
         {
-            Marmoset.nextTimestep();
+            Marmoset.nextTimestep(true);
         }
     }
 
