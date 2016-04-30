@@ -5,9 +5,9 @@ import java.nio.ByteBuffer;
 /**
  * Created by alexander on 23/03/2016.
  */
-public interface Vehicle {
+public interface Vehicle<T extends VehicleIterator> {
 
-    VehicleIterator getVehicleIterator();
+    T getVehicleIterator();
 
     void init();
     void accelerationStep();

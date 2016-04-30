@@ -10,6 +10,8 @@ import java.util.List;
  */
 public class SelfDrivingVehicleIterator extends DijkstraVehicleIterator {
 
+    protected SelfDrivingVehicleIterator() {}
+
     public SelfDrivingVehicleIterator(List<EdgeIteratorState> edges, FlagEncoder encoder)
     {
         super(edges, encoder);
@@ -25,5 +27,16 @@ public class SelfDrivingVehicleIterator extends DijkstraVehicleIterator {
     public int getRemainingEdges()
     {
         return edges.size() - index;
+    }
+
+    @Override
+    public SelfDrivingVehicleIterator duplicate()
+    {
+        SelfDrivingVehicleIterator sdvi = new SelfDrivingVehicleIterator();
+        sdvi.encoder = encoder;
+        sdvi.edge = edge;
+        sdvi.edges = edges;
+        sdvi.index = index;
+        return sdvi;
     }
 }

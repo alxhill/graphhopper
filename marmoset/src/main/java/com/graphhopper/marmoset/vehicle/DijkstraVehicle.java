@@ -27,7 +27,7 @@ public class DijkstraVehicle extends BaseVehicle {
     }
 
     @Override
-    public VehicleIterator getVehicleIterator()
+    public DijkstraVehicleIterator getVehicleIterator()
     {
         GraphHopper gh = hopper.getGraphHopper();
 

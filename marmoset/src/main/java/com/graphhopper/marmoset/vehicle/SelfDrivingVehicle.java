@@ -28,7 +28,7 @@ public class SelfDrivingVehicle extends DijkstraVehicle {
     private List<EdgeIteratorState> edgeList;
 
     @Override
-    public VehicleIterator getVehicleIterator()
+    public SelfDrivingVehicleIterator getVehicleIterator()
     {
         edgeList = calculateRoute();
 
