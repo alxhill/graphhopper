@@ -103,13 +103,15 @@ public class Marmoset {
         {
             nextTimestep(false);
             // termination conditions so it doesn't loop endlessly if one or two get stuck
+            MarmosetHopper.Metrics m = mh.getMetrics();
             if (vehCount == mh.getVehicleCount() &&
-                    mh.getMetrics().averageCells == 0 &&
-                    vehCount < 50)
-            {
+                    Math.round(100*m.averageCells) == 0 &&
+                    m.notAtMax == mh.getVehicleCount() &&
+                    m.slowed == mh.getVehicleCount()){
                 logger.info("Terminating early due to permanent loop occurring");
                 break;
             }
+            vehCount = mh.getVehicleCount();
         }
         EventManager.trigger("offline:stop");
     }
