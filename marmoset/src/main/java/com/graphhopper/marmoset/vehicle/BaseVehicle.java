@@ -19,7 +19,7 @@ import java.util.Random;
 /**
  * Created by alexander on 16/02/2016.
  */
-public abstract class BaseVehicle<T extends VehicleIterator> implements Vehicle<T> {
+public abstract class BaseVehicle implements Vehicle {
 
     private static final Logger logger = LoggerFactory.getLogger(BaseVehicle.class);
 
@@ -31,7 +31,7 @@ public abstract class BaseVehicle<T extends VehicleIterator> implements Vehicle<
     protected Location dest;
     protected boolean finished;
 
-    protected T route;
+    protected VehicleIterator route;
 
     protected int cellId;
     protected int v; // velocity
