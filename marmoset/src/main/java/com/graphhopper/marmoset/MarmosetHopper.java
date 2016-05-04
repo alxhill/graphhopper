@@ -73,6 +73,8 @@ public class MarmosetHopper {
 
         sdvPercent = args.getDouble("marmoset.sdvpercent", 1);
         assert sdvPercent >= 0 && sdvPercent <= 1;
+
+        sdvController = new MultiSDVController(args);
     }
 
     public void addVehicle()
@@ -229,7 +231,7 @@ public class MarmosetHopper {
                 {
                     int maxId = this.getGraphHopperStorage().getAllEdges().getMaxId();
                     expectedWeighting = new ExpectedWeighting(encoder, wMap, maxId);
-                    sdvController = new MultiSDVController(expectedWeighting);
+                    sdvController.setExpectedWeighting(expectedWeighting);
                 }
                 return expectedWeighting;
             }

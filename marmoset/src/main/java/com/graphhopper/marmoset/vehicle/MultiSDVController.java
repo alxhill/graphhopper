@@ -2,6 +2,7 @@ package com.graphhopper.marmoset.vehicle;
 
 import com.graphhopper.marmoset.event.EventManager;
 import com.graphhopper.marmoset.util.ExpectedWeighting;
+import com.graphhopper.util.CmdArgs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,18 +19,21 @@ public class MultiSDVController {
 
     private static final Logger logger = LoggerFactory.getLogger(MultiSDVController.class);
 
-    public static final double DAMPING_FACTOR = 0.2;
-    public static final double REROUTE_PROBABILITY = 0.001;
-    public static final int EXPMAP_UPDATE_FREQUENCY = 100;
+    public final double DAMPING_FACTOR;
+    public final double REROUTE_PROBABILITY;
+    public final int EXPMAP_UPDATE_FREQUENCY;
 
     protected LinkedList<SelfDrivingVehicle> vehicles;
-    protected final ExpectedWeighting expectedWeighting;
+    protected ExpectedWeighting expectedWeighting;
 
     private Random rerouteRand = new Random(9876);
 
-    public MultiSDVController(ExpectedWeighting expectedWeighting)
+    public MultiSDVController(CmdArgs args)
     {
-        this.expectedWeighting = expectedWeighting;
+        DAMPING_FACTOR = args.getDouble("marmoset.dampingfactor", 0.2);
+        REROUTE_PROBABILITY = args.getDouble("marmoset.rerouteprob", 0.001);
+        EXPMAP_UPDATE_FREQUENCY = args.getInt("marmoset.expmapupdatefreq", 100);
+
         vehicles = new LinkedList<>();
         EventManager.listenTo("vehicle:added", (s, vehicle) -> {
             Vehicle v = (Vehicle) vehicle[0];
@@ -38,11 +42,19 @@ public class MultiSDVController {
                 vehicles.add((SelfDrivingVehicle) v);
             }
         });
-        EventManager.listenTo("timestep:end", (s, args) -> timestepHandler((Integer) args[0]));
+        EventManager.listenTo("timestep:end", (s, a) -> timestepHandler((Integer) a[0]));
+    }
+
+    public void setExpectedWeighting(ExpectedWeighting expectedWeighting)
+    {
+        this.expectedWeighting = expectedWeighting;
     }
 
     public void timestepHandler(int iteration)
     {
+        if (expectedWeighting == null)
+            return;
+
         ExecutorService es = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
         int rerouteCount = (int) (REROUTE_PROBABILITY * vehicles.size());
