@@ -161,6 +161,7 @@ var carSet = {
         document.getElementById("info").innerHTML =
             "<p>Vehicles:" + liveVehicles + " (" + (this._carCount-liveVehicles)+"/"+this._carCount+")</p>" +
             "<p>Mean velocity: "+ Math.round(1000 * totalVel / liveVehicles) / 1000 +"</p>";
+        document.getElementsByClassName("leaflet-popup-pane")[0].innerHTML = "";
     }
 };
 
